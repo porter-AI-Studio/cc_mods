@@ -1,0 +1,267 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-ccykbmgk><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>手寫一個 Mod：plugin.json、hooks.json 與 register | Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</title><meta name="description" content="從零手寫官方教學的 first-mod：建立 plugin.json、hooks.json 與 register.js 三個檔案，逐個 hook 講解觀察、回答、改寫三種處理方式，並用 validate 與 plugin-dir 驗證。"><link rel="icon" href="/cc_mods/favicon.svg" type="image/svg+xml"><script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script><link rel="stylesheet" href="/cc_mods/_astro/DocsLayout.9CQhNdRI.css"><style>.cb-wrap[data-astro-cid-c6nuo4je]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-c6nuo4je]{background:#1a1a2e;border:1px solid #ffffff14;border-bottom-color:#ffffff0d;border-radius:6px 6px 0 0;justify-content:space-between;align-items:center;min-height:1.8rem;padding:.18rem .5rem .18rem .75rem;display:flex}.cb-label[data-astro-cid-c6nuo4je]{color:#a6adc8;letter-spacing:.04em;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem}.cb-inner[data-astro-cid-c6nuo4je] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-c6nuo4je]{color:#888;cursor:pointer;background:#ffffff14;border:1px solid #ffffff1f;border-radius:4px;flex-shrink:0;padding:.15rem .55rem;font-size:.7rem;transition:all .15s}.cb-copy[data-astro-cid-c6nuo4je]:hover{color:#fff;background:#ffffff2e}.cb-copy[data-astro-cid-c6nuo4je].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head><body data-astro-cid-ccykbmgk><div id="pb" data-astro-cid-ccykbmgk></div><header data-astro-cid-ccykbmgk><div class="hi" data-astro-cid-ccykbmgk><div class="hl" data-astro-cid-ccykbmgk><button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-ccykbmgk><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-ccykbmgk></path></svg></button><a href="/cc_mods/" class="site-name" data-astro-cid-ccykbmgk><span class="logo" data-astro-cid-ccykbmgk>CM</span>&nbsp;&nbsp;Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</a></div><div class="hr" data-astro-cid-ccykbmgk><button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-ccykbmgk><svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-ccykbmgk></path></svg><svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-ccykbmgk></path></svg></button></div></div></header><div id="layout" data-astro-cid-ccykbmgk><nav id="sb" data-astro-cid-ccykbmgk><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="0" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 0：前言</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="0" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/preface" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>0.</span><span data-astro-cid-ccykbmgk>前言</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="1" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 1：認識 Mods</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="1" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch01-what-are-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>1.</span><span data-astro-cid-ccykbmgk>什麼是 Claude Mods：在 Claude Code 裡面跑的外掛</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch02-mods-vs-others" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>2.</span><span data-astro-cid-ccykbmgk>Mods 與 hooks、skills、plugins、MCP 的分工</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch03-how-mods-work" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>3.</span><span data-astro-cid-ccykbmgk>Mods 怎麼運作：事件、三種處理方式與執行環境</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="2" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 2：安裝與使用</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="2" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch04-install-and-manage" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>4.</span><span data-astro-cid-ccykbmgk>安裝、啟用與管理 Mods</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch05-builtin-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>5.</span><span data-astro-cid-ccykbmgk>內建 Mods：sec-default、diff、telemetry 與 agents-md</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch06-community-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>6.</span><span data-astro-cid-ccykbmgk>社群 Mods 精選與挑選原則</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="3" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 3：開發自己的 Mod</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="3" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch07-first-mod-with-claude" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>7.</span><span data-astro-cid-ccykbmgk>第一個 Mod：請 Claude 代寫</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch08-write-by-hand" class="active" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>8.</span><span data-astro-cid-ccykbmgk>手寫一個 Mod：plugin.json、hooks.json 與 register</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch09-events-and-api" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>9.</span><span data-astro-cid-ccykbmgk>事件與 $ API：介面、指令、提示與分叉</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch10-test-debug-share" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>10.</span><span data-astro-cid-ccykbmgk>測試、驗證、除錯與分享</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch11-compose-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>11.</span><span data-astro-cid-ccykbmgk>組合多個 Mod：hook 順序與 noun contract</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="4" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 4：實戰案例</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="4" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch12-case-guard-meter-pyenv" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>12.</span><span data-astro-cid-ccykbmgk>守門器、輪次計量條與 /pyenv</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch13-case-panels" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>13.</span><span data-astro-cid-ccykbmgk>面板類 Mod：用量儀表、快取倒數、遮罩與待辦</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch14-case-my-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>14.</span><span data-astro-cid-ccykbmgk>我的四個 Mod：obs-log-timer、herdr-watch、file-collision、next-steps</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="5" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 5：安全與團隊導入</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="5" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch15-security" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>15.</span><span data-astro-cid-ccykbmgk>安全：Mods 沒有沙箱，權限跟你一樣</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch16-governance" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>16.</span><span data-astro-cid-ccykbmgk>團隊導入與治理：審查、管控與取捨</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="6" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 6：附錄</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="6" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/glossary" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>17.</span><span data-astro-cid-ccykbmgk>名詞解釋</span></a></li></ul></div></nav><div id="ov" data-astro-cid-ccykbmgk></div><main data-astro-cid-ccykbmgk><div class="cb" data-astro-cid-ccykbmgk><span class="clabel">第 8 章 · Part 3：開發自己的 Mod</span><h1>手寫一個 Mod：plugin.json、hooks.json 與 register</h1><p class="cdesc">三個檔案、四個 hook，不需要 Node.js，也不需要 build</p><p>上一章 Claude 替你寫完了 Mod；這一章你自己動手，目的不是取代代寫，而是看懂它：之後要審查、修改或除錯任何 Mod，都得讀得懂這三個檔案。我們跟著官方 Create a mod 教學的 <code>first-mod</code> 走：它計算 Claude 的工具呼叫次數、把次數顯示在 spinner 旁邊，並新增一個 <code>/tally</code> 指令印出目前的次數。下面的 <code>register.js</code> 主體取自一位社群作者在 v2.1.287 上逐步實作的記錄，該文明言它依官方教學而來；其他指令與守門片段是本書依官方文件改寫或自編，會另外註明。</p><h2>一個 Mod 就是三個檔案</h2><p>官方 Mods reference 的 Files 一節列出一個 Mod 的組成：</p><table><thead><tr><th>檔案</th><th>必要</th><th>內容</th></tr></thead><tbody><tr><td><code>.claude-plugin/plugin.json</code></td><td>是</td><td>plugin 的 manifest；Mod 沒有額外的必填欄位</td></tr><tr><td><code>hooks/hooks.json</code></td><td>是</td><td><code>modules</code>：只含一個路徑的陣列，相對於這個檔案，指向 hooks module</td></tr><tr><td>hooks module，如 <code>hooks/register.js</code></td><td>是</td><td>Mod 的進入點，匯出 <code>register(on, options)</code>；可以是 <code>.js</code>、<code>.mjs</code>、<code>.cjs</code>、<code>.jsx</code>、<code>.ts</code>、<code>.mts</code>、<code>.cts</code> 或 <code>.tsx</code>，且為 ES module</td></tr><tr><td><code>types/index.d.ts</code>（由 manifest 的 <code>types</code> 指定）</td><td>用到 <code>$.state</code> 或替 <code>$</code> 新增 namespace 時才需要</td><td>宣告 <code>PluginState</code> 的值，與 Mod 新增的 namespace</td></tr><tr><td><code>*.test.ts</code>、<code>*.test.tsx</code></td><td>否</td><td><code>claude plugin test</code> 會執行的測試</td></tr></tbody></table><p>官方也強調：不需要 Node.js、bundler 或 build 步驟，Claude Code 直接載入 <code>.js</code> 與 <code>.ts</code>。</p><div class="call info"><span class="ci">💬</span><div><p><strong>三個檔案、四個 hook，沒有 Node.js、沒有 bundler、沒有 build：寫 Mod 的門檻是讀懂它，不是建置它。</strong></p></div></div><h2>步驟一到三：manifest 與 hooks.json</h2><p>先建兩層目錄，然後寫 <code>plugin.json</code>。依 Plugin manifest reference，<code>name</code> 是唯一必填鍵，建議用 kebab-case；沒有 <code>version</code>、<code>description</code> 或 <code>author</code> 時 validate 會給警告（加 <code>--strict</code> 則警告變成失敗），所以教學把它們都寫上。</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>bash</span><button class="cb-copy" data-code="mkdir -p first-mod/.claude-plugin first-mod/hooks" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="bash"><code><span class="line"><span style="color:#61AFEF">mkdir</span><span style="color:#D19A66"> -p</span><span style="color:#98C379"> first-mod/.claude-plugin</span><span style="color:#98C379"> first-mod/hooks</span></span></code></pre></div></div><script type="module">document.querySelectorAll(`.cb-copy`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent=`已複製!`,e.classList.add(`copied`),setTimeout(()=>{e.textContent=`複製`,e.classList.remove(`copied`)},2e3)})})});</script><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>first-mod/.claude-plugin/plugin.json</span><button class="cb-copy" data-code="{
+  &quot;name&quot;: &quot;first-mod&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;description&quot;: &quot;Counts Claude's tool calls, shows the count beside the spinner, and adds a /tally command&quot;,
+  &quot;author&quot;: { &quot;name&quot;: &quot;Your Name&quot; }
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "name"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"first-mod"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  "version"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"0.1.0"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  "description"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"Counts Claude's tool calls, shows the count beside the spinner, and adds a /tally command"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  "author"</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">"name"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"Your Name"</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><p>接著是整個 Mod 最關鍵的那一行：<code>hooks.json</code> 的 <code>modules</code>。這個鍵讓一個 plugin 被當成 Mod，缺了它，這只是一個普通 plugin。</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>first-mod/hooks/hooks.json</span><button class="cb-copy" data-code="{
+  &quot;description&quot;: &quot;The first-mod hooks module&quot;,
+  &quot;modules&quot;: [&quot;./register.js&quot;]
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "description"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"The first-mod hooks module"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  "modules"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"./register.js"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><h2>步驟四：register.js</h2><p>hooks module 匯出一個 <code>register</code> 函式。Mod 載入時 Claude Code 呼叫它一次，並傳入 <code>on</code>；每呼叫一次 <code>on</code>，就為一個事件註冊一個 hook。</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>first-mod/hooks/register.js</span><button class="cb-copy" data-code="// The count, shared by the hooks below
+let calls = 0
+// Claude Code calls this once when the mod loads
+export function register(on) {
+  // Runs when the session starts, before your first prompt
+  on('session.start', async ($, e, next) => {
+    // Add the /tally command
+    await $.command.register({
+      name: 'tally',
+      description: 'Show how many tool calls Claude has made',
+    })
+    // Let the session start as usual
+    return next(e)
+  })
+  // Runs each time Claude is about to use a tool
+  on('tool.call', async ($, e, next) => {
+    calls += 1
+    // Ask Claude Code to draw the interface again, so the new count shows
+    $.ui.invalidate('ui.render')
+    // Let the tool run as usual
+    return next(e)
+  })
+  // Runs when you type /tally, and only then, because of the matcher
+  on('command.run', { command: 'tally' }, async () => {
+    // The text to print in the transcript
+    return { text: 'Claude has made ' + calls + ' tool calls since this mod loaded' }
+  })
+  // Runs each time Claude Code draws the spinner
+  on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
+    // Keep Claude Code's spinner, with the count added after its word
+    return next({ ...e, props: { ...e.props, suffix: ' · tool calls: ' + calls + '…' } })
+  })
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="javascript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// The count, shared by the hooks below</span></span>
+<span class="line"><span style="color:#C678DD">let</span><span style="color:#E06C75"> calls</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> 0</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// Claude Code calls this once when the mod loads</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> function</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">on</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // Runs when the session starts, before your first prompt</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'session.start'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Add the /tally command</span></span>
+<span class="line"><span style="color:#C678DD">    await</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">command</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">register</span><span style="color:#ABB2BF">({</span></span>
+<span class="line"><span style="color:#E06C75">      name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'tally'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      description</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Show how many tool calls Claude has made'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">    })</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Let the session start as usual</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // Runs each time Claude is about to use a tool</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E06C75">    calls</span><span style="color:#56B6C2"> +=</span><span style="color:#D19A66"> 1</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Ask Claude Code to draw the interface again, so the new count shows</span></span>
+<span class="line"><span style="color:#E5C07B">    $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">ui</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">invalidate</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'ui.render'</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Let the tool run as usual</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // Runs when you type /tally, and only then, because of the matcher</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'command.run'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">command</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'tally'</span><span style="color:#ABB2BF"> }, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> () </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // The text to print in the transcript</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">text</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Claude has made '</span><span style="color:#56B6C2"> +</span><span style="color:#E06C75"> calls</span><span style="color:#56B6C2"> +</span><span style="color:#98C379"> ' tool calls since this mod loaded'</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // Runs each time Claude Code draws the spinner</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'ui.render'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">component</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Spinner'</span><span style="color:#ABB2BF"> }, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Keep Claude Code's spinner, with the count added after its word</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">({ ...</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">props</span><span style="color:#ABB2BF">: { ...</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">props</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">suffix</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">' · tool calls: '</span><span style="color:#56B6C2"> +</span><span style="color:#E06C75"> calls</span><span style="color:#56B6C2"> +</span><span style="color:#98C379"> '…'</span><span style="color:#ABB2BF"> } })</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><p>每個 hook 都收到三個一樣的參數：</p><ul><li><code>$</code>：mods API。Mod 要碰檔案、程序、網路或介面，都只能經過它。官方規定每個呼叫要寫完整，如 <code>$.fs.read('notes.md')</code>。</li><li><code>e</code>：事件的輸入，是深度凍結的純資料；想改，要傳一份複本給 <code>next</code>。</li><li><code>next</code>：下一個處理者，像 middleware：先跑後面的 hook，最後是 Claude Code 自己的行為，並回傳該事件的結果。</li></ul><figure class="svg-fig"><svg width="100%" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="hook 收到的 next 與三種處理方式">
+  <g font-family="system-ui, sans-serif">
+    <defs><marker id="ch08-arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <text x="400" y="24" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">next 像 middleware：先跑後面的 hook，最後是 Claude Code 自己的行為</text>
+    <rect x="15" y="42" width="150" height="56" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="90.0" y="76" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">事件輸入 e</text>
+    <rect x="215" y="42" width="170" height="56" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="1.5"/>
+    <text x="300.0" y="76" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">你的 hook</text>
+    <rect x="435" y="42" width="150" height="56" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="510.0" y="76" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">後面的 hook</text>
+    <rect x="635" y="42" width="150" height="56" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="710.0" y="66" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">Claude Code</text>
+    <text x="710.0" y="86" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">自己的行為</text>
+    <line x1="167" y1="70" x2="213" y2="70" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow2)"/>
+    <line x1="387" y1="70" x2="433" y2="70" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow2)"/>
+    <text x="410" y="60" text-anchor="middle" font-size="14px" fill="var(--muted)">next</text>
+    <line x1="587" y1="70" x2="633" y2="70" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow2)"/>
+    <text x="610" y="60" text-anchor="middle" font-size="14px" fill="var(--muted)">next</text>
+    <line x1="710" y1="112" x2="300" y2="112" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow2)"/>
+    <text x="505" y="132" text-anchor="middle" font-size="14px" fill="var(--muted)">回傳該事件的結果</text>
+    <rect x="15" y="152" width="250" height="128" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="140" y="184" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--accent)">觀察</text>
+    <text x="140" y="214" text-anchor="middle" font-size="15px" fill="var(--text)">回傳 next(e)</text>
+    <text x="140" y="240" text-anchor="middle" font-size="15px" fill="var(--text)">原樣往後傳</text>
+    <rect x="275" y="152" width="250" height="128" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="400" y="184" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--accent)">改寫</text>
+    <text x="400" y="214" text-anchor="middle" font-size="15px" fill="var(--text)">把修改過的複本</text>
+    <text x="400" y="240" text-anchor="middle" font-size="15px" fill="var(--text)">傳給 next</text>
+    <rect x="535" y="152" width="250" height="128" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="660" y="184" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--accent)">回答</text>
+    <text x="660" y="214" text-anchor="middle" font-size="15px" fill="var(--text)">不呼叫 next</text>
+    <text x="660" y="240" text-anchor="middle" font-size="15px" fill="var(--text)">直接回傳自己的結果</text>
+  </g>
+</svg><figcaption>圖 8-1：hook 收到的 next 與三種處理方式</figcaption></figure><p>對照第 3 章的三種處理方式，<code>first-mod</code> 這四個 hook 剛好各示範一遍：</p><table><thead><tr><th>hook</th><th>何時執行</th><th>做什麼</th><th>處理方式</th></tr></thead><tbody><tr><td><code>session.start</code></td><td>session 開始（第一個 prompt 之前）與 Mod 重載時</td><td>註冊 <code>/tally</code></td><td>觀察：回傳 <code>next(e)</code>，session 照常開始</td></tr><tr><td><code>tool.call</code></td><td>Claude 要使用工具之前</td><td><code>calls</code> 加一，要求重畫介面</td><td>觀察：回傳 <code>next(e)</code>，工具照常執行</td></tr><tr><td><code>command.run</code></td><td>輸入 <code>/tally</code> 時（matcher 限縮為 <code>command: 'tally'</code>）</td><td>回傳含次數的文字</td><td>回答：不呼叫 <code>next</code>，直接回傳自己的結果</td></tr><tr><td><code>ui.render</code></td><td>畫 spinner 時（matcher 為 <code>Spinner</code> 元件）</td><td>在 spinner 的字後面加上次數</td><td>改寫：把修改過 <code>suffix</code> 的 <code>e</code> 傳給 <code>next</code></td></tr></tbody></table><p><code>on</code> 的第二個參數是 matcher：事件欄位的過濾條件，可以是值、允許值的陣列或正規表達式。沒有 matcher 的 hook 對該事件全部觸發。</p><figure class="svg-fig"><svg width="100%" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mod 的三個檔案與 register 註冊的四個 hook">
+  <g font-family="system-ui, sans-serif">
+    <defs><marker id="ch08-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <rect x="15" y="44" width="250" height="62" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="140" y="70" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">plugin.json</text>
+    <text x="140" y="92" text-anchor="middle" font-size="15px" fill="var(--text)">manifest，name 必填</text>
+    <rect x="15" y="136" width="250" height="62" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="140" y="162" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">hooks.json</text>
+    <text x="140" y="184" text-anchor="middle" font-size="15px" fill="var(--text)">modules 一行指向 module</text>
+    <rect x="15" y="228" width="250" height="62" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="1.5"/>
+    <text x="140" y="254" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--accent)">register.js</text>
+    <text x="140" y="276" text-anchor="middle" font-size="15px" fill="var(--text)">匯出 register(on)</text>
+    <line x1="140" y1="106" x2="140" y2="134" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow)"/>
+    <line x1="140" y1="198" x2="140" y2="226" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow)"/>
+    <line x1="267" y1="259" x2="328" y2="259" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow)"/>
+    <text x="297" y="248" text-anchor="middle" font-size="14px" fill="var(--muted)">on()</text>
+    <rect x="330" y="40" width="455" height="252" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="557" y="66" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">register(on) 註冊的四個 hook</text>
+    <rect x="346" y="82" width="423" height="40" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="362" y="108" text-anchor="start" font-size="17px" font-weight="700" fill="var(--accent)">session.start</text>
+    <text x="560" y="108" text-anchor="start" font-size="15px" fill="var(--text)">觀察：next(e)</text>
+    <rect x="346" y="132" width="423" height="40" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="362" y="158" text-anchor="start" font-size="17px" font-weight="700" fill="var(--accent)">tool.call</text>
+    <text x="560" y="158" text-anchor="start" font-size="15px" fill="var(--text)">觀察：next(e)</text>
+    <rect x="346" y="182" width="423" height="40" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="362" y="208" text-anchor="start" font-size="17px" font-weight="700" fill="var(--accent)">command.run</text>
+    <text x="560" y="208" text-anchor="start" font-size="15px" fill="var(--text)">回答：不呼叫 next</text>
+    <rect x="346" y="232" width="423" height="40" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="362" y="258" text-anchor="start" font-size="17px" font-weight="700" fill="var(--accent)">ui.render</text>
+    <text x="560" y="258" text-anchor="start" font-size="15px" fill="var(--text)">改寫：傳修改過的複本</text>
+    <rect x="15" y="308" width="770" height="40" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="400" y="334" text-anchor="middle" font-size="15px" fill="var(--text)">不需要 Node.js、bundler 或 build 步驟</text>
+  </g>
+</svg><figcaption>圖 8-2：Mod 的三個檔案，以及 register 註冊的四個 hook</figcaption></figure><div class="call info"><span class="ci">ℹ️</span><div><strong>module 變數會在每次重載時歸零</strong><p>Claude Code 會監看用 <code>--plugin-dir</code> 載入的目錄，檔案一變就熱重載 hooks module；每次重載都重跑 <code>register</code>，所以 <code>calls</code> 會回到 0。要跨重載保留的值，要放進 <code>$.state</code>（整個 session 有效）或 <code>$.store</code>（跨 session），這是第 9 章的主題。</p></div></div><h2>步驟五：用 validate 看 Claude Code 怎麼讀你的 Mod</h2><p><code>claude plugin validate</code> 檢查 manifest，並對 hooks module 的原始碼做和載入時相同的靜態分析，不會執行你的程式碼：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>bash</span><button class="cb-copy" data-code="claude plugin validate ./first-mod
+
+# 輸出（節錄自社群作者在 2.1.287 的實測）
+#   ❯ ./register.js hooks: session.start, tool.call, command.run{command=tally},
+# ui.render{component=Spinner}
+#   ❯ ./register.js calls: $.command.register, $.ui.invalidate
+# ✔ Validation passed" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="bash"><code><span class="line"><span style="color:#61AFEF">claude</span><span style="color:#98C379"> plugin</span><span style="color:#98C379"> validate</span><span style="color:#98C379"> ./first-mod</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 輸出（節錄自社群作者在 2.1.287 的實測）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   ❯ ./register.js hooks: session.start, tool.call, command.run{command=tally},</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ui.render{component=Spinner}</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   ❯ ./register.js calls: $.command.register, $.ui.invalidate</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✔ Validation passed</span></span></code></pre></div></div><p>驗證重點是：<code>hooks:</code> 列出事件（matcher 用大括號表示）、<code>calls:</code> 列出呼叫的 mods API，最後出現 <code>Validation passed</code>。靜態分析有幾項主要限制，違反會導致驗證失敗，以下整理四項：</p><ul><li>每個 mods API 呼叫要寫完整，不能把 <code>$.ui</code> 指派給變數，也不能解構。</li><li>事件名稱要用字串常值，變數或迴圈都不行。</li><li>檔案開頭用 ES module 的 <code>import</code>，動態 <code>import()</code> 不行，不要用 <code>require</code>。</li><li>只能以相對路徑 import 自己的檔案；唯一允許的裸 import 是 <code>claude-code</code>（型別與少數 helper）。</li></ul><figure class="svg-fig"><img src="/cc_mods/img/ch08/02-infographic-validate-four-rules.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="validate 靜態分析的四條規則" loading="lazy"><figcaption>圖 8-3：validate 靜態分析的四條規則</figcaption></figure><p>這就是 Mod 沒有 Node 也沒有 DOM 的原因：限制越多，Claude Code 才能在執行前列出一個 Mod 碰了什麼。同樣的指令也是你審查別人的 Mod 的入口（第 6 章）。</p><div class="call info"><span class="ci">💬</span><div><p><strong>Mod 沒有 Node 也沒有 DOM，不是缺陷而是交換：限制越多，Claude Code 越能在執行前說清楚這個 Mod 碰了什麼。</strong></p></div></div><h3>型別宣告：Claude Code 會替你寫</h3><p>用 <code>--plugin-dir</code> 在互動 session 載入 Mod 時，Claude Code 會把 TypeScript 宣告檔寫進 Mod 的 <code>.claude-plugin/types/</code>。其中 <code>claude-code/index.d.ts</code> 涵蓋你這個版本的每個事件與其輸入、輸出、每個 mods API namespace 與方法，並為每個方法附上註解與範例；<code>claude-code-tools/index.d.ts</code> 宣告內建工具的輸入與結果，讓 <code>e.tool === 'Bash'</code> 這類判斷能縮小型別。Mod 沒有自己的 <code>tsconfig.json</code> 時，Claude Code 也會補一份，編輯器與 <code>tsc -p ./first-mod</code> 都能直接用。官方的建議是：事件與方法會隨版本變動，檔案與網頁說法不一致時，以這些宣告檔為準。</p><figure class="svg-fig"><img src="/cc_mods/img/ch08/01-infographic-types-declarations.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="Claude Code 替你寫的型別宣告" loading="lazy"><figcaption>圖 8-4：Claude Code 替你寫的型別宣告</figcaption></figure><h2>步驟六、七：載入並實際跑</h2><p>不安裝，只在單一 session 載入：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>bash</span><button class="cb-copy" data-code="# 非互動模式：只驗證 session.start 與 command.run 兩個 hook
+claude -p &quot;/tally&quot; --plugin-dir ./first-mod --max-turns 1
+# first-mod: Claude has made 0 tool calls since this mod loaded
+
+# 互動模式：spinner 與 tool.call 在這裡才看得到
+claude --plugin-dir ./first-mod" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 非互動模式：只驗證 session.start 與 command.run 兩個 hook</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#D19A66"> -p</span><span style="color:#98C379"> "/tally"</span><span style="color:#D19A66"> --plugin-dir</span><span style="color:#98C379"> ./first-mod</span><span style="color:#D19A66"> --max-turns</span><span style="color:#D19A66"> 1</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># first-mod: Claude has made 0 tool calls since this mod loaded</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 互動模式：spinner 與 tool.call 在這裡才看得到</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#D19A66"> --plugin-dir</span><span style="color:#98C379"> ./first-mod</span></span></code></pre></div></div><p><code>-p</code> 模式沒有互動畫面，只有 <code>session.start</code> 與 <code>command.run</code> 會被觸發，所以輸出是 0 次工具呼叫；<code>--max-turns 1</code> 是那位作者自己加的，官方教學沒有加也得到相同的輸出。進入互動模式後，執行 <code>/plugin</code>，分頁下方會有一行 <code>1 mod active · first-mod</code>；請 Claude 列出檔案、讀一個檔案，spinner 後面會出現 <code>tool calls: N</code>，結束後輸入 <code>/tally</code> 就會看到總數。</p><div class="call warn"><span class="ci">⚠️</span><div><strong>兩個容易踩的環境問題</strong><p>一是版本：多位日本作者因為 Homebrew 舊版 CLI（2.1.226、2.1.234）和 Desktop 內附的 2.1.286 並存，遇到莫名的 validate 錯誤，建議每個使用的地方各查一次版本。二是顯示位置：Mod 畫的介面只出現在終端機與 Desktop 的 Code 分頁；VS Code 擴充套件的對話面板裡 hook 仍會執行，但看不到介面，我自己實測也是如此。</p></div></div><h2>要擋東西的 Mod：加上 .catch</h2><p>如果你的 Mod 是守門員（拒絕工具呼叫），多一個必要的寫法。<code>on</code> 會回傳一個註冊物件，它有一個方法 <code>.catch(handler)</code>，用來設定 hook 的錯誤處理。原因是：一個丟出例外、或超過 10 秒時限的 hook 會被略過，被略過的守門 hook 等於放行。社群教學 safe-shell 範例的 fail closed 寫法如下（這裡只留骨架），<code>next.called</code> 只在 <code>.catch</code> 處理函式裡可用，<code>true</code> 代表該 hook 出錯前已經呼叫過 <code>next</code>：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>register.js（片段）</span><button class="cb-copy" data-code="export function register(on) {
+  on('tool.call', { tool: 'Bash' }, ($, e, next) => {
+    // ...判斷這個指令能不能跑...
+    return next(e)
+  }).catch(($, e, next) =>
+    // 守門的 hook 自己壞掉時要拒絕，而不是放行
+    next.called ? next(e) : { deny: 'the guard failed, so the command was not run.' },
+  )
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="javascript"><code><span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> function</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">on</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF"> }, (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // ...判斷這個指令能不能跑...</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  }).</span><span style="color:#61AFEF">catch</span><span style="color:#ABB2BF">((</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // 守門的 hook 自己壞掉時要拒絕，而不是放行</span></span>
+<span class="line"><span style="color:#E5C07B">    next</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">called</span><span style="color:#C678DD"> ?</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">:</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'the guard failed, so the command was not run.'</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#ABB2BF">  )</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><figure class="svg-fig"><svg width="100%" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="守門 hook 出錯時：沒有 .catch 與加上 .catch">
+  <g font-family="system-ui, sans-serif">
+    <defs><marker id="ch08-arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <text x="15" y="26" text-anchor="start" font-size="17px" font-weight="700" fill="var(--text)">沒有 .catch：被略過的守門 hook 等於放行</text>
+    <rect x="15" y="38" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="125" y="62" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">hook 出錯</text>
+    <text x="125" y="84" text-anchor="middle" font-size="14px" fill="var(--text)">丟出例外，或超過</text>
+    <text x="125" y="102" text-anchor="middle" font-size="14px" fill="var(--text)">10 秒時限</text>
+    <line x1="237" y1="73" x2="288" y2="73" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow3)"/>
+    <rect x="290" y="38" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="400" y="62" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">hook 被略過</text>
+    <text x="400" y="84" text-anchor="middle" font-size="14px" fill="var(--text)">Claude Code 不採用它</text>
+    <line x1="512" y1="73" x2="563" y2="73" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow3)"/>
+    <rect x="565" y="38" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="675" y="62" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">守門等於放行</text>
+    <text x="675" y="84" text-anchor="middle" font-size="14px" fill="var(--text)">工具照常執行</text>
+    <text x="15" y="140" text-anchor="start" font-size="17px" font-weight="700" fill="var(--text)">加上 .catch：fail closed，出錯時拒絕</text>
+    <rect x="15" y="152" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="125" y="176" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">hook 出錯</text>
+    <text x="125" y="198" text-anchor="middle" font-size="14px" fill="var(--text)">丟出例外，或超過</text>
+    <text x="125" y="216" text-anchor="middle" font-size="14px" fill="var(--text)">10 秒時限</text>
+    <line x1="237" y1="187" x2="288" y2="187" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow3)"/>
+    <rect x="290" y="152" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="1.5"/>
+    <text x="400" y="176" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">.catch(handler) 接手</text>
+    <text x="400" y="198" text-anchor="middle" font-size="14px" fill="var(--text)">next.called 只在這裡可用</text>
+    <line x1="512" y1="187" x2="563" y2="187" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch08-arrow3)"/>
+    <rect x="565" y="152" width="220" height="70" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="675" y="176" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">拒絕執行</text>
+    <text x="675" y="198" text-anchor="middle" font-size="14px" fill="var(--text)">已呼叫過 next 就 next(e)</text>
+    <text x="675" y="216" text-anchor="middle" font-size="14px" fill="var(--text)">否則回傳 deny</text>
+    <text x="400" y="258" text-anchor="middle" font-size="15px" fill="var(--text)">validate 會為每個可能拒絕動作的 hook 多印一行，標出有沒有 .catch</text>
+  </g>
+</svg><figcaption>圖 8-5：守門 hook 出錯時，沒有 .catch 與加上 .catch 的差別</figcaption></figure><p>驗證時 <code>validate</code> 會為每個可能拒絕動作的 hook 多印一行，標出它有沒有 <code>.catch</code>，審查別人的守門 Mod 時先看這一行。守門 Mod 的完整範例留到第 12 章。</p><div class="call info"><span class="ci">💬</span><div><p><strong>守門 hook 被略過就等於放行，所以它自己壞掉時，要拒絕得親手用 <code>.catch</code> 寫出來。</strong></p></div></div><h2>小結</h2><ul><li>Mod = <code>plugin.json</code> + <code>hooks/hooks.json</code>（<code>modules</code> 一行）+ 匯出 <code>register(on)</code> 的 hooks module。</li><li>hook 收到 <code>$</code>、<code>e</code>、<code>next</code>：回 <code>next(e)</code> 是觀察，傳修改過的複本是改寫，不呼叫 <code>next</code> 是回答。</li><li>先 <code>validate</code>，再用 <code>--plugin-dir</code> 載入實測；要求失敗時拒絕的守門 hook，要加 <code>.catch</code>。</li></ul><p>下一章拆開 <code>$</code> 這個 mods API：介面、指令、提示與分叉各有哪些方法、事件有哪些、hook 的順序怎麼排。</p></div><nav class="cnav" data-astro-cid-ccykbmgk><a href="/cc_mods/ch07-first-mod-with-claude" class="prev" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>← 上一章</span><span class="nt" data-astro-cid-ccykbmgk>第一個 Mod：請 Claude 代寫</span></a><a href="/cc_mods/ch09-events-and-api" class="next" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>下一章 →</span><span class="nt" data-astro-cid-ccykbmgk>事件與 $ API：介面、指令、提示與分叉</span></a></nav></main></div><script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script></body></html>

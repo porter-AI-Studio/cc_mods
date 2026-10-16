@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-ccykbmgk><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>團隊導入與治理：審查、管控與取捨 | Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</title><meta name="description" content="給準備在團隊導入 Claude Code Mods 的決策者：依官方管理文件說明預設狀態、審查清單、managed settings 的管控層級、marketplace 白名單與組織自有的政策 Mod，並整理各種做法的取捨、已知限制與分階段導入建議。"><link rel="icon" href="/cc_mods/favicon.svg" type="image/svg+xml"><script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script><link rel="stylesheet" href="/cc_mods/_astro/DocsLayout.9CQhNdRI.css"><style>.cb-wrap[data-astro-cid-c6nuo4je]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-c6nuo4je]{background:#1a1a2e;border:1px solid #ffffff14;border-bottom-color:#ffffff0d;border-radius:6px 6px 0 0;justify-content:space-between;align-items:center;min-height:1.8rem;padding:.18rem .5rem .18rem .75rem;display:flex}.cb-label[data-astro-cid-c6nuo4je]{color:#a6adc8;letter-spacing:.04em;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem}.cb-inner[data-astro-cid-c6nuo4je] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-c6nuo4je]{color:#888;cursor:pointer;background:#ffffff14;border:1px solid #ffffff1f;border-radius:4px;flex-shrink:0;padding:.15rem .55rem;font-size:.7rem;transition:all .15s}.cb-copy[data-astro-cid-c6nuo4je]:hover{color:#fff;background:#ffffff2e}.cb-copy[data-astro-cid-c6nuo4je].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head><body data-astro-cid-ccykbmgk><div id="pb" data-astro-cid-ccykbmgk></div><header data-astro-cid-ccykbmgk><div class="hi" data-astro-cid-ccykbmgk><div class="hl" data-astro-cid-ccykbmgk><button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-ccykbmgk><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-ccykbmgk></path></svg></button><a href="/cc_mods/" class="site-name" data-astro-cid-ccykbmgk><span class="logo" data-astro-cid-ccykbmgk>CM</span>&nbsp;&nbsp;Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</a></div><div class="hr" data-astro-cid-ccykbmgk><button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-ccykbmgk><svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-ccykbmgk></path></svg><svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-ccykbmgk></path></svg></button></div></div></header><div id="layout" data-astro-cid-ccykbmgk><nav id="sb" data-astro-cid-ccykbmgk><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="0" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 0：前言</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="0" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/preface" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>0.</span><span data-astro-cid-ccykbmgk>前言</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="1" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 1：認識 Mods</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="1" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch01-what-are-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>1.</span><span data-astro-cid-ccykbmgk>什麼是 Claude Mods：在 Claude Code 裡面跑的外掛</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch02-mods-vs-others" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>2.</span><span data-astro-cid-ccykbmgk>Mods 與 hooks、skills、plugins、MCP 的分工</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch03-how-mods-work" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>3.</span><span data-astro-cid-ccykbmgk>Mods 怎麼運作：事件、三種處理方式與執行環境</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="2" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 2：安裝與使用</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="2" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch04-install-and-manage" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>4.</span><span data-astro-cid-ccykbmgk>安裝、啟用與管理 Mods</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch05-builtin-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>5.</span><span data-astro-cid-ccykbmgk>內建 Mods：sec-default、diff、telemetry 與 agents-md</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch06-community-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>6.</span><span data-astro-cid-ccykbmgk>社群 Mods 精選與挑選原則</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="3" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 3：開發自己的 Mod</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="3" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch07-first-mod-with-claude" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>7.</span><span data-astro-cid-ccykbmgk>第一個 Mod：請 Claude 代寫</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch08-write-by-hand" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>8.</span><span data-astro-cid-ccykbmgk>手寫一個 Mod：plugin.json、hooks.json 與 register</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch09-events-and-api" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>9.</span><span data-astro-cid-ccykbmgk>事件與 $ API：介面、指令、提示與分叉</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch10-test-debug-share" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>10.</span><span data-astro-cid-ccykbmgk>測試、驗證、除錯與分享</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch11-compose-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>11.</span><span data-astro-cid-ccykbmgk>組合多個 Mod：hook 順序與 noun contract</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="4" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 4：實戰案例</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="4" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch12-case-guard-meter-pyenv" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>12.</span><span data-astro-cid-ccykbmgk>守門器、輪次計量條與 /pyenv</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch13-case-panels" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>13.</span><span data-astro-cid-ccykbmgk>面板類 Mod：用量儀表、快取倒數、遮罩與待辦</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch14-case-my-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>14.</span><span data-astro-cid-ccykbmgk>我的四個 Mod：obs-log-timer、herdr-watch、file-collision、next-steps</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="5" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 5：安全與團隊導入</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="5" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch15-security" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>15.</span><span data-astro-cid-ccykbmgk>安全：Mods 沒有沙箱，權限跟你一樣</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch16-governance" class="active" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>16.</span><span data-astro-cid-ccykbmgk>團隊導入與治理：審查、管控與取捨</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="6" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 6：附錄</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="6" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/glossary" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>17.</span><span data-astro-cid-ccykbmgk>名詞解釋</span></a></li></ul></div></nav><div id="ov" data-astro-cid-ccykbmgk></div><main data-astro-cid-ccykbmgk><div class="cb" data-astro-cid-ccykbmgk><span class="clabel">第 16 章 · Part 5：安全與治理</span><h1>團隊導入與治理：審查、管控與取捨</h1><p class="cdesc">給決策者：先看預設值，再決定要放多寬</p><p>上一章的結論是：Mod 的權限等同使用者，個人可以靠自己審查，團隊不行。這一章寫給要決定「團隊要不要開、開多寬」的人。內容以 Anthropic 官方的 Manage mods 與 Manage plugins 兩份管理文件為主，第三方文章只在標明來源時補充；標「作者判斷」的部分是我的看法，不是官方建議。</p><h2>先看預設值：你現在其實已經開著</h2><p>依官方文件，Mods 預設就是開的（終端機需 Claude Code 2.1.287 以上，Desktop 是 2.1.286 以上）。使用者可以從任何你的 plugin 設定允許的 marketplace 裝含 Mod 的 plugin，也可以用 <code>--plugin-dir</code> 從目錄載入，Claude 在對話中替他寫的 Mod 也能載入。你現有的 plugin 管控，等於決定了使用者能載入什麼：</p><table><thead><tr><th>你現有的 plugin 管控</th><th>使用者能載入的 Mod</th></tr></thead><tbody><tr><td>沒有</td><td>任何 marketplace、任何目錄的 <code>--plugin-dir</code>、Claude 對話中寫的 Mod</td></tr><tr><td>marketplace 白名單</td><td>白名單內 marketplace 的 Mod，加上任何目錄的 <code>--plugin-dir</code>；對話中寫入 skills 目錄的 Mod，只有白名單含 <code>skills-dir</code> 時才能載入</td></tr><tr><td>白名單加 <code>disableSideloadFlags</code></td><td>只有白名單內 marketplace 的 Mod</td></tr></tbody></table><p>第 15 章已說明：守門 Mod <code>sec-default@builtin</code> 只在機器有 managed settings，或使用者以 Team／Enterprise 方案登入時才載入；用 API key 的人必須靠 managed settings。這決定了後面所有選項是否生效，所以<strong>第一步是確認 managed settings 真的送到每台機器</strong>。官方管理文件提供的驗證方式是：在受管機器上用 <code>--plugin-dir</code> 載入一個 Mod，看 hook 是否被拒絕、transcript 與 debug log 是否出現守門 Mod 的訊息。</p><figure class="svg-fig"><svg width="100%" viewBox="0 0 820 330" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ch16-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+    </marker>
+  </defs>
+  <g font-family="system-ui, sans-serif">
+    <text x="410" y="26" text-anchor="middle" font-size="15px" fill="var(--muted)">使用者能載入的 Mod：管控越加越緊</text>
+
+    <rect x="10" y="45" width="250" height="150" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="135" y="75" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">沒有 plugin 管控</text>
+    <text x="135" y="112" text-anchor="middle" font-size="14px" fill="var(--text)">任何 marketplace</text>
+    <text x="135" y="138" text-anchor="middle" font-size="14px" fill="var(--text)">任何目錄的 --plugin-dir</text>
+    <text x="135" y="164" text-anchor="middle" font-size="14px" fill="var(--text)">Claude 對話中寫的 Mod</text>
+
+    <line x1="262" y1="120" x2="298" y2="120" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow)"/>
+
+    <rect x="300" y="45" width="250" height="150" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="425" y="75" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">marketplace 白名單</text>
+    <text x="425" y="120" text-anchor="middle" font-size="14px" fill="var(--text)">白名單內 marketplace</text>
+    <text x="425" y="146" text-anchor="middle" font-size="14px" fill="var(--text)">任何目錄的 --plugin-dir</text>
+
+    <line x1="552" y1="120" x2="588" y2="120" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow)"/>
+
+    <rect x="590" y="45" width="220" height="150" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="700" y="73" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent)">白名單加</text>
+    <text x="700" y="95" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent)">disableSideloadFlags</text>
+    <text x="700" y="140" text-anchor="middle" font-size="14px" fill="var(--text)">只有白名單內</text>
+    <text x="700" y="162" text-anchor="middle" font-size="14px" fill="var(--text)">marketplace 的 Mod</text>
+
+    <rect x="10" y="220" width="800" height="92" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="410" y="252" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent2)">管控管的是「誰能載入」，不是「載入後做什麼」</text>
+    <text x="410" y="277" text-anchor="middle" font-size="14px" fill="var(--text)">沒有任何一項控制把 Mod 關進沙箱</text>
+    <text x="410" y="298" text-anchor="middle" font-size="14px" fill="var(--text)">審查、版本固定與稽核不能省</text>
+  </g>
+</svg><figcaption>圖 16-1：plugin 管控的三個層級與它管不到的範圍</figcaption></figure><h2>審查清單：每個 Mod 上線前要過的關</h2><p>官方審查工具是 <code>claude plugin validate</code>，輸出的 <code>hooks:</code> 與 <code>calls:</code> 兩行列出事件與 API 呼叫（範例輸出見上一章）。官方列出要特別看的呼叫如下，我把它改寫成審查表：</p><table><thead><tr><th>在 <code>calls:</code> 看到</th><th>代表</th><th>審查時問什麼</th></tr></thead><tbody><tr><td><code>$.fs.read</code>、<code>$.fs.write</code></td><td>讀寫使用者能碰的任何檔案</td><td>路徑是否限在專案或自己的資料夾？</td></tr><tr><td><code>$.process.run</code>、<code>$.process.spawn</code></td><td>以使用者身分啟動程式</td><td>指令是否固定？官方範例的政策 Mod 預設就拒絕這兩者</td></tr><tr><td><code>$.http.fetch</code></td><td>網路請求</td><td>目的地是否固定？有沒有「抓下來再執行」？</td></tr><tr><td><code>$.env.get</code>、<code>$.settings.read</code></td><td>讀環境變數與設定，可能含 API key</td><td>輸出的 <code>env reads:</code> 行列出哪些變數？</td></tr><tr><td><code>$.model.complete</code></td><td>花使用者的方案或 API key</td><td>每回合會呼叫幾次？</td></tr><tr><td><code>$.prompt.submit</code>、<code>$.session.send</code></td><td>代使用者送 prompt、傳訊息給其他 session</td><td>是否限制在使用者有感的場合？</td></tr><tr><td>hook 為 <code>tool.call</code>、<code>prompt.submit</code>、<code>tool.check</code></td><td>看得到並可改寫、核准每個呼叫</td><td>為什麼需要？</td></tr><tr><td><code>session.append</code>，或掛在 AskUserQuestion 上的 <code>ui.render</code></td><td>可改寫儲存前的對話、可重畫詢問對話框</td><td>為什麼需要？</td></tr></tbody></table><p>validate 之外，要補上第 15 章列的三項人工動作，它們來自 Pluto Security 與 ssdnodes 的建議，不是官方要求：讀原始碼（特別是改寫傳給 <code>next</code> 的值的地方）、用 commit 固定你審過的版本、拒絕執行期才抓遠端程式碼的 Mod。marketplace 條目可以用 <code>ref</code> 加 <code>sha</code>（40 字元的 commit）固定第三方 plugin，這是官方 marketplace 格式的功能；developersdigest 與 dev.to 文章也都把它當成團隊核准單一版本的做法。</p><figure class="svg-fig"><img src="/cc_mods/img/ch16/02-infographic-review-checklist.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="審查清單" loading="lazy"><figcaption>圖 16-2：審查清單</figcaption></figure><p>審查結論要留紀錄。作者判斷：審查是有時效的，marketplace 開啟自動更新後磁碟上的檔案可能改變，審過的版本號與 sha 要連同結論一起存檔。</p><h2>管控層級：從放任到全關</h2><p>官方管理文件把可選政策整理成一張對照表，每種都只需要幾個 managed setting：</p><table><thead><tr><th>你要的狀態</th><th>設定</th><th>代價</th></tr></thead><tbody><tr><td>沒有任何使用者安裝的 Mod，settings hook 不動</td><td>守門 Mod 的 <code>allowManagedModsOnly</code>，且不部署自己的 Mod</td><td>內建 Mod 不受影響</td></tr><tr><td>連你自己的 managed hook 也一起關</td><td><code>disableAllHooks: true</code></td><td>最寬：managed 的 <code>PreToolUse</code> hook 也不再阻擋，自訂狀態列與 <code>/goal</code> 也停</td></tr><tr><td>只有組織自己的 Mod</td><td><code>allowManagedModsOnly</code> 加上部署自有 Mod</td><td>需要自己維護 Mod 與分發目錄</td></tr><tr><td>核准過的 marketplace 內任何 Mod</td><td>marketplace 限制加 <code>disableSideloadFlags: true</code></td><td>只決定能從哪裡裝，不管載入後的行為</td></tr><tr><td>任何 Mod，但由你的政策 Mod 檢查其他 Mod</td><td>安裝自有 Mod，並與 <code>sec-default@builtin</code> 一起列入 <code>prependPlugins</code></td><td>政策 Mod 本身出錯時預設放行，見下文</td></tr></tbody></table><figure class="svg-fig"><img src="/cc_mods/img/ch16/01-framework-control-levels.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="管控層級：從放任到全關" loading="lazy"><figcaption>圖 16-3：管控層級：從放任到全關</figcaption></figure><p>另有 <code>allowManagedHooksOnly</code>：只有組織的 Mod 與內建 Mod 會載入，而且會擋掉使用者自己 settings 檔裡的 hook，範圍比 <code>allowManagedModsOnly</code> 更廣，設定前官方要求先讀它的「什麼仍會執行」清單。<code>disableSideloadFlags</code> 會在啟動時拒絕 <code>--plugin-dir</code> 與 <code>--plugin-url</code>，並讓 Claude 在對話中寫的 Mod 無法載入，同時也拒絕 <code>--agents</code> 與 <code>--mcp-config</code>。這些設定只有放在 managed settings 才算數，放在使用者、專案、本機設定檔，或 <code>--settings</code> 傳入的檔案都沒有效果。</p><p>「只有組織自己的 Mod」是最常見的嚴格模式，官方給的完整 <code>managed-settings.json</code> 如下：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>managed-settings.json（官方範例）</span><button class="cb-copy" data-code="{
+  &quot;extraKnownMarketplaces&quot;: {
+    &quot;acme-tools&quot;: {
+      &quot;source&quot;: { &quot;source&quot;: &quot;directory&quot;, &quot;path&quot;: &quot;/opt/acme/claude-plugins&quot; }
+    }
+  },
+  &quot;enabledPlugins&quot;: { &quot;acme-guard@acme-tools&quot;: true },
+  &quot;prependPlugins&quot;: [&quot;acme-guard@acme-tools&quot;, &quot;sec-default@builtin&quot;],
+  &quot;pluginConfigs&quot;: {
+    &quot;cc-plugin-sec-default@builtin&quot;: {
+      &quot;options&quot;: { &quot;allowManagedModsOnly&quot;: true }
+    }
+  },
+  &quot;disableSideloadFlags&quot;: true
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "extraKnownMarketplaces"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "acme-tools"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "source"</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">"source"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"directory"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">"path"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/opt/acme/claude-plugins"</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#E06C75">  "enabledPlugins"</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">"acme-guard@acme-tools"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#E06C75">  "prependPlugins"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"acme-guard@acme-tools"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"sec-default@builtin"</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#E06C75">  "pluginConfigs"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "cc-plugin-sec-default@builtin"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "options"</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">"allowManagedModsOnly"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#E06C75">  "disableSideloadFlags"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><script type="module">document.querySelectorAll(`.cb-copy`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent=`已複製!`,e.classList.add(`copied`),setTimeout(()=>{e.textContent=`複製`,e.classList.remove(`copied`)},2e3)})})});</script><p>注意一個容易踩的坑：要被視為「組織的 Mod」，plugin 必須同時符合官方三個條件：managed 的 <code>enabledPlugins</code> 設為 <code>true</code>；marketplace 以絕對路徑指向機器上的目錄；marketplace 以相對路徑列出該 plugin，讓 Claude Code 原地載入。從 GitHub、git、URL、npm 複製到快取的 plugin 一律算使用者的，<code>prependPlugins</code> 會略過、<code>allowManagedModsOnly</code> 會拒絕。官方還提醒，這個目錄與其上層目錄只能由管理員寫入，任何能寫入的人都能改寫你的 Mod；而 admin console 送出的 managed settings 能帶這些鍵，卻無法把目錄放到機器上，仍需要 MDM 之類的方式分發。</p><h2>marketplace 管控：先決定能從哪裡裝</h2><p>Mod 是 plugin，所以 plugin 的管控也同樣適用。官方列出的重點：<code>strictKnownMarketplaces</code> 是來源白名單（別名 <code>allowedMarketplaces</code>），<code>blockedMarketplaces</code> 是黑名單且優先檢查；兩者檢查的是 marketplace 的來源，不是 marketplace 裡的單一 plugin 條目。黑名單的寫法例如：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>blockedMarketplaces（官方範例）</span><button class="cb-copy" data-code="{
+  &quot;blockedMarketplaces&quot;: [
+    { &quot;source&quot;: &quot;github&quot;, &quot;repo&quot;: &quot;untrusted-org/*&quot; }
+  ]
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "blockedMarketplaces"</span><span style="color:#ABB2BF">: [</span></span>
+<span class="line"><span style="color:#ABB2BF">    { </span><span style="color:#E06C75">"source"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"github"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">"repo"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"untrusted-org/*"</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">  ]</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><p>幾個決策者要知道的細節，都來自官方管理文件：空陣列 <code>[]</code> 會鎖掉所有來源，包含官方 marketplace；設了白名單而沒有 <code>&#123;`&#123; "source": "skills-dir" &#125;`&#125;</code> 項目時，使用者放在 skills 目錄的 plugin 會停止載入；白名單與黑名單在下載前、以及每次 session 啟動時都會檢查，來源不再符合的已安裝 plugin 不會載入；<code>enabledPlugins</code> 設為 <code>false</code> 可在所有範圍封鎖並隱藏某個 plugin。<code>strictKnownMarketplaces</code> 本身擋不了 <code>--plugin-dir</code>，所以要搭配 <code>disableSideloadFlags</code>。</p><p>managed settings 有三種送達方式：admin console 的 server-managed、MDM、本機的 <code>managed-settings.json</code> 檔。官方說預設同一台機器只會套用其中一種，順序是 server-managed、MDM、檔案，取第一個有送出政策鍵的來源；只要 server-managed 送了任何一個不相關的鍵，MDM 與檔案裡的 plugin 鍵就會被忽略，除非把 <code>managedSourcesBehavior</code> 設為 <code>"merge"</code>。先用檔案試辦、後來開 admin console 的團隊最容易踩到。</p><figure class="svg-fig"><svg width="100%" viewBox="0 0 820 250" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ch16-arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+    </marker>
+  </defs>
+  <g font-family="system-ui, sans-serif">
+    <text x="410" y="22" text-anchor="middle" font-size="14px" fill="var(--muted)">預設同一台機器只套用其中一種，取第一個有送出政策鍵的來源</text>
+
+    <rect x="10" y="40" width="230" height="80" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="125" y="70" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">server-managed</text>
+    <text x="125" y="96" text-anchor="middle" font-size="14px" fill="var(--muted)">admin console</text>
+
+    <line x1="242" y1="80" x2="298" y2="80" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-b)"/>
+
+    <rect x="300" y="40" width="230" height="80" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="415" y="70" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">MDM</text>
+    <text x="415" y="96" text-anchor="middle" font-size="14px" fill="var(--muted)">第二順位</text>
+
+    <line x1="532" y1="80" x2="588" y2="80" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-b)"/>
+
+    <rect x="590" y="40" width="220" height="80" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="700" y="70" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">managed-settings.json</text>
+    <text x="700" y="96" text-anchor="middle" font-size="14px" fill="var(--muted)">本機檔案</text>
+
+    <rect x="10" y="140" width="800" height="95" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="410" y="170" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent2)">容易踩到的坑</text>
+    <text x="410" y="196" text-anchor="middle" font-size="14px" fill="var(--text)">server-managed 只要送了任何一個不相關的鍵，MDM 與檔案裡的 plugin 鍵就被忽略</text>
+    <text x="410" y="218" text-anchor="middle" font-size="14px" fill="var(--text)">除非把 managedSourcesBehavior 設為 merge</text>
+  </g>
+</svg><figcaption>圖 16-4：managed settings 三種送達方式的套用順序</figcaption></figure><h2>自己的政策 Mod：能做什麼、會怎麼壞</h2><p>當你需要「允許某些人的 Mod、拒絕另一些」或「記錄 Mod 做了什麼」，就要寫自己的政策 Mod。它在每個 Mod 載入前會收到 <code>plugin.register</code> 事件，裡面的 <code>e.uses</code> 就是 validate 印出的清單，可以據此用 <code>&#123;`&#123; refuse &#125;`&#125;</code> 擋掉；它也能用 API 呼叫的名字（如 <code>fs.write</code>）攔截所有 Mod 的對應呼叫。重點在失敗行為：官方文件指出，如果這個檢查 hook 拋例外或超時，Claude Code 會略過它，檢查就變成放行。要改成失敗時拒絕，就要加 <code>.catch</code>：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>acme-guard/hooks/register.js（官方範例，失敗即拒絕）</span><button class="cb-copy" data-code="const BLOCKED_CALLS = ['process.run', 'process.spawn']
+// The same check as before, moved into a function of its own
+async function checkMod($, e, next) {
+  const blocked = e.uses.calls.filter((call) => BLOCKED_CALLS.includes(call))
+  if (e.tier === 'user' &amp;&amp; blocked.length > 0) {
+    return { refuse: 'Acme policy: mods may not call ' + blocked.join(', ') }
+  }
+  return next(e)
+}
+export function register(on) {
+  // The handler runs only when checkMod throws or exceeds its time limit
+  on('plugin.register', checkMod).catch(async ($, e, next) => {
+    // Let your organization's mods and built-in mods load
+    if (e.tier !== 'user') return next(e)
+    // Refuse the user's mod that couldn't be checked
+    return { refuse: 'Acme policy check failed, so this mod was not loaded' }
+  })
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="javascript"><code><span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> BLOCKED_CALLS</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> [</span><span style="color:#98C379">'process.run'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'process.spawn'</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// The same check as before, moved into a function of its own</span></span>
+<span class="line"><span style="color:#C678DD">async</span><span style="color:#C678DD"> function</span><span style="color:#61AFEF"> checkMod</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">  const</span><span style="color:#E5C07B"> blocked</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> e</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">uses</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">calls</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">filter</span><span style="color:#ABB2BF">((</span><span style="color:#E06C75;font-style:italic">call</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#E5C07B"> BLOCKED_CALLS</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">includes</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">call</span><span style="color:#ABB2BF">))</span></span>
+<span class="line"><span style="color:#C678DD">  if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">tier</span><span style="color:#56B6C2"> ===</span><span style="color:#98C379"> 'user'</span><span style="color:#56B6C2"> &#x26;&#x26;</span><span style="color:#E5C07B"> blocked</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">length</span><span style="color:#56B6C2"> ></span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">refuse</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Acme policy: mods may not call '</span><span style="color:#56B6C2"> +</span><span style="color:#E5C07B"> blocked</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">join</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">', '</span><span style="color:#ABB2BF">) }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#C678DD">  return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> function</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">on</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // The handler runs only when checkMod throws or exceeds its time limit</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'plugin.register'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">checkMod</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">catch</span><span style="color:#ABB2BF">(</span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Let your organization's mods and built-in mods load</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">tier</span><span style="color:#56B6C2"> !==</span><span style="color:#98C379"> 'user'</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Refuse the user's mod that couldn't be checked</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">refuse</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Acme policy check failed, so this mod was not loaded'</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><figure class="svg-fig"><svg width="100%" viewBox="0 0 820 330" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ch16-arrow-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+    </marker>
+  </defs>
+  <g font-family="system-ui, sans-serif">
+    <rect x="10" y="100" width="170" height="80" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="95" y="132" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">plugin.register</text>
+    <text x="95" y="157" text-anchor="middle" font-size="14px" fill="var(--muted)">每個 Mod 載入前</text>
+
+    <line x1="180" y1="140" x2="228" y2="140" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-c)"/>
+
+    <rect x="230" y="90" width="170" height="100" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="315" y="125" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--accent)">checkMod</text>
+    <text x="315" y="152" text-anchor="middle" font-size="14px" fill="var(--text)">讀 e.uses 清單</text>
+    <text x="315" y="172" text-anchor="middle" font-size="14px" fill="var(--text)">政策 Mod 的檢查</text>
+
+    <line x1="400" y1="115" x2="458" y2="62" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-c)"/>
+    <line x1="400" y1="140" x2="458" y2="145" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-c)"/>
+    <line x1="400" y1="165" x2="458" y2="228" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch16-arrow-c)"/>
+
+    <rect x="460" y="25" width="350" height="75" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="635" y="55" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">檢查正常完成</text>
+    <text x="635" y="80" text-anchor="middle" font-size="14px" fill="var(--text)">用 refuse 擋掉不合政策的 Mod</text>
+
+    <rect x="460" y="110" width="350" height="75" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="2" stroke-dasharray="7 5"/>
+    <text x="635" y="140" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent2)">拋例外或超時（沒有 .catch）</text>
+    <text x="635" y="165" text-anchor="middle" font-size="14px" fill="var(--text)">Claude Code 略過它，檢查變成放行</text>
+
+    <rect x="460" y="195" width="350" height="75" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="635" y="225" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--accent)">加上 .catch</text>
+    <text x="635" y="250" text-anchor="middle" font-size="14px" fill="var(--text)">無法檢查的使用者 Mod 被拒絕</text>
+
+    <text x="410" y="305" text-anchor="middle" font-size="14px" fill="var(--muted)">作者判斷：政策 Mod 是補強工具，不是唯一的防線</text>
+  </g>
+</svg><figcaption>圖 16-5：政策 Mod 的檢查失敗時，有無 .catch 的差別</figcaption></figure><p>官方也說明政策 Mod 並非不會被繞開：背景 worker 若當掉三次，Claude Code 會卸載所有非內建 Mod，包含你的，直到使用者重新載入或開新 session；<code>--safe-mode</code> 也會停掉所有已安裝的 Mod，連你的也不例外。相對地，守門 Mod 本身是「失敗即拒絕」：讀不到 managed settings 就拒絕所有使用者的 Mod。作者判斷：政策 Mod 是補強工具，不是唯一的防線；真正不能失手的限制，仍要用 managed settings 的鍵來做。</p><div class="call info"><span class="ci">💬</span><div><p><strong>政策 Mod 的檢查若拋例外或超時就會變成放行；加上 <code>.catch</code>，才是「檢查不了的 Mod，就當作沒通過」。</strong></p></div></div><h2>取捨：三種常見立場</h2><table><thead><tr><th>立場</th><th>適合</th><th>得到</th><th>失去</th></tr></thead><tbody><tr><td>全關（<code>allowManagedModsOnly</code>，不部署自有 Mod）</td><td>受法規約束、無人力審查的團隊</td><td>最小攻擊面，settings hook 與 skills 照常運作</td><td>使用者做不了任何面板、狀態列、客製指令</td></tr><tr><td>只放組織自己的 Mod</td><td>有平台團隊、想提供標準化工具</td><td>可控、可稽核、能攔截其他 Mod</td><td>維護成本，以及分發目錄的管理</td></tr><tr><td>白名單 marketplace 加審查</td><td>想保留社群生態、又要有來源控制</td><td>彈性最大</td><td>審查負擔，且載入後的行為仍靠審查，不靠機制</td></tr></tbody></table><p>這張表是作者判斷。有兩點要提醒：第一，所有管控都不是沙箱，官方管理文件明說「沒有任何一項控制把 Mod 關進沙箱」；第二，網路政策只涵蓋 Mod 的 <code>$.http.fetch</code>（條件是組織政策不允許 WebFetch），不涵蓋 <code>$.process.run</code> 啟動的程式；<code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code> 從 v2.1.288 起也不再停止使用者安裝的 Mod 的 <code>$.http.fetch</code>。</p><div class="call info"><span class="ci">💬</span><div><p><strong>載入管控決定誰能進門；進門後要限制 Mod 的 API 呼叫，還得檢查政策與子程序這兩條邊界。</strong></p></div></div><h2>來源之間的差異與限制</h2><ul><li><strong>撤銷是否立即</strong>：agentpatterns.ai 的文章主張政策收緊後既有安裝「要等下次 refresh」才失效；官方管理文件則寫白名單與黑名單在 session 啟動時對已安裝 plugin 再檢查一次。兩者衝突時我採官方，但仍建議自己實測「撤銷一個來源後，下次 session 是否真的不載入」。</li><li><strong>設定鍵名稱</strong>：同一篇文章用 <code>strictPluginOnlyCustomization</code> 搭配 <code>mcpServers</code> 的寫法；官方的陣列值是 <code>skills</code>、<code>agents</code>、<code>hooks</code>、<code>mcp</code>，以官方為準。</li><li><strong>早期文章的過時資訊</strong>：2026 年 9 月的文章（例如 wavect.io 的德文文章）描述的是需要 <code>CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1</code> 的早期測試期；官方現在說 2.1.287 以後會忽略這個變數，設成 <code>0</code> 也關不掉，要改用 <code>allowManagedModsOnly</code>。</li><li><strong>API 還在變</strong>：官方文件寫著文件與 GitHub 上的型別宣告可能比你安裝的版本舊；有些功能有最低版本需求，例如 <code>isDeferred: false</code> 需要 v2.1.293。導入前先固定 Claude Code 版本，升級後重跑測試。</li></ul><h2>建議的導入順序（作者判斷）</h2><ol><li><strong>先確認守門 Mod 會載入</strong>：每台機器都收到 managed settings，用 <code>claude --debug</code> 與 <code>--plugin-dir</code> 驗證政策有生效。</li><li><strong>先關再開</strong>：先設 <code>allowManagedModsOnly</code> 與 <code>disableSideloadFlags</code>，再逐一核准 Mod。wavect.io 建議在可控的試辦專案、用合成資料、指定負責人與回復流程，不要假設有穩定的支援合約。</li><li><strong>從低風險開始</strong>：像第 13 章的用量儀表、第 14 章的 next-steps 這種不連網、不啟動程式的 Mod，審查最簡單。先用三個左右的 Mod 試辦，逼自己把版本固定、命名與審查流程想清楚。</li><li><strong>留稽核與回復</strong>：用政策 Mod 或 debug log 記錄 Mod 載入與寫檔；確認 <code>--safe-mode</code> 能作為「Mod 造成問題」時的第一個排查步驟。</li><li><strong>用成本衡量，不是用展示</strong>：wavect.io 提出用「每個通過驗收的任務的總成本」比較有無 Mod，包含模型成本、開發與審查時間；這是它的評估方法，不是官方公式。</li></ol><figure class="svg-fig"><img src="/cc_mods/img/ch16/03-flow-rollout-steps.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="建議的導入順序" loading="lazy"><figcaption>圖 16-6：建議的導入順序</figcaption></figure><p>驗證政策是否生效時，官方建議在測試機上這樣做：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>驗證政策（官方建議的檢查方式）</span><button class="cb-copy" data-code="claude --debug
+claude --plugin-dir ./any-mod" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="bash"><code><span class="line"><span style="color:#61AFEF">claude</span><span style="color:#D19A66"> --debug</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#D19A66"> --plugin-dir</span><span style="color:#98C379"> ./any-mod</span></span></code></pre></div></div><p>用 <code>claude --debug</code> 讀 debug log：你的 Mod 會出現 <code>tier prepend</code>；使用者的 Mod 會被 <code>refused by cc-plugin-sec-default</code> 拒絕；<code>--plugin-dir</code> 則會以 <code>--plugin-dir is disabled by your organization's managed settings (disableSideloadFlags)</code> 開頭的訊息結束。</p><div class="call warn"><span class="ci">⚠️</span><div><strong>治理不等於防護</strong><p>以上所有設定管的是「誰能載入」，不是「載入後做什麼」。即使只放行組織自己的 Mod，那份 Mod 仍有使用者的全部權限。所以審查、版本固定與稽核，不能因為有了 managed settings 就省略。</p></div></div><h2>小結</h2><p>全書到這裡完成了一條線：從 Mod 是什麼、怎麼裝、怎麼寫，到它沒有沙箱、團隊該怎麼管。對決策者而言，記住兩件事就夠：預設是開的，而管控是你主動加上去的；管控決定誰能載入，審查才決定載入的東西可不可信。書中出現的主要名詞整理在 <a href="/cc_mods/glossary/">名詞解釋</a>。</p></div><nav class="cnav" data-astro-cid-ccykbmgk><a href="/cc_mods/ch15-security" class="prev" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>← 上一章</span><span class="nt" data-astro-cid-ccykbmgk>安全：Mods 沒有沙箱，權限跟你一樣</span></a><a href="/cc_mods/glossary" class="next" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>下一章 →</span><span class="nt" data-astro-cid-ccykbmgk>名詞解釋</span></a></nav></main></div><script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script></body></html>

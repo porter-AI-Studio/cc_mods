@@ -1,0 +1,492 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-ccykbmgk><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>守門器、輪次計量條與 /pyenv | Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</title><meta name="description" content="用三個完整案例走一遍 Mod 開發：以 tool.call 與 catch 做到失敗就拒絕的守門器、用 turn.complete 與 $.state 在輸入框上方畫出輪次計量條，以及用 command.run 與 $.process.run 替 Claude 查出 Python 環境的 /pyenv，並說明各自的測試寫法、已知限制與設計取捨。"><link rel="icon" href="/cc_mods/favicon.svg" type="image/svg+xml"><script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script><link rel="stylesheet" href="/cc_mods/_astro/DocsLayout.9CQhNdRI.css"><style>.cb-wrap[data-astro-cid-c6nuo4je]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-c6nuo4je]{background:#1a1a2e;border:1px solid #ffffff14;border-bottom-color:#ffffff0d;border-radius:6px 6px 0 0;justify-content:space-between;align-items:center;min-height:1.8rem;padding:.18rem .5rem .18rem .75rem;display:flex}.cb-label[data-astro-cid-c6nuo4je]{color:#a6adc8;letter-spacing:.04em;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem}.cb-inner[data-astro-cid-c6nuo4je] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-c6nuo4je]{color:#888;cursor:pointer;background:#ffffff14;border:1px solid #ffffff1f;border-radius:4px;flex-shrink:0;padding:.15rem .55rem;font-size:.7rem;transition:all .15s}.cb-copy[data-astro-cid-c6nuo4je]:hover{color:#fff;background:#ffffff2e}.cb-copy[data-astro-cid-c6nuo4je].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head><body data-astro-cid-ccykbmgk><div id="pb" data-astro-cid-ccykbmgk></div><header data-astro-cid-ccykbmgk><div class="hi" data-astro-cid-ccykbmgk><div class="hl" data-astro-cid-ccykbmgk><button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-ccykbmgk><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-ccykbmgk></path></svg></button><a href="/cc_mods/" class="site-name" data-astro-cid-ccykbmgk><span class="logo" data-astro-cid-ccykbmgk>CM</span>&nbsp;&nbsp;Claude Code Mods 實戰：用 TypeScript 改裝你的 Claude Code</a></div><div class="hr" data-astro-cid-ccykbmgk><button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-ccykbmgk><svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-ccykbmgk></path></svg><svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-ccykbmgk></path></svg></button></div></div></header><div id="layout" data-astro-cid-ccykbmgk><nav id="sb" data-astro-cid-ccykbmgk><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="0" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 0：前言</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="0" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/preface" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>0.</span><span data-astro-cid-ccykbmgk>前言</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="1" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 1：認識 Mods</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="1" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch01-what-are-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>1.</span><span data-astro-cid-ccykbmgk>什麼是 Claude Mods：在 Claude Code 裡面跑的外掛</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch02-mods-vs-others" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>2.</span><span data-astro-cid-ccykbmgk>Mods 與 hooks、skills、plugins、MCP 的分工</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch03-how-mods-work" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>3.</span><span data-astro-cid-ccykbmgk>Mods 怎麼運作：事件、三種處理方式與執行環境</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="2" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 2：安裝與使用</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="2" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch04-install-and-manage" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>4.</span><span data-astro-cid-ccykbmgk>安裝、啟用與管理 Mods</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch05-builtin-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>5.</span><span data-astro-cid-ccykbmgk>內建 Mods：sec-default、diff、telemetry 與 agents-md</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch06-community-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>6.</span><span data-astro-cid-ccykbmgk>社群 Mods 精選與挑選原則</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="3" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 3：開發自己的 Mod</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="3" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch07-first-mod-with-claude" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>7.</span><span data-astro-cid-ccykbmgk>第一個 Mod：請 Claude 代寫</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch08-write-by-hand" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>8.</span><span data-astro-cid-ccykbmgk>手寫一個 Mod：plugin.json、hooks.json 與 register</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch09-events-and-api" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>9.</span><span data-astro-cid-ccykbmgk>事件與 $ API：介面、指令、提示與分叉</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch10-test-debug-share" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>10.</span><span data-astro-cid-ccykbmgk>測試、驗證、除錯與分享</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch11-compose-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>11.</span><span data-astro-cid-ccykbmgk>組合多個 Mod：hook 順序與 noun contract</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt open" data-pid="4" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 4：實戰案例</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl" data-pl="4" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch12-case-guard-meter-pyenv" class="active" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>12.</span><span data-astro-cid-ccykbmgk>守門器、輪次計量條與 /pyenv</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch13-case-panels" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>13.</span><span data-astro-cid-ccykbmgk>面板類 Mod：用量儀表、快取倒數、遮罩與待辦</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch14-case-my-mods" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>14.</span><span data-astro-cid-ccykbmgk>我的四個 Mod：obs-log-timer、herdr-watch、file-collision、next-steps</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="5" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 5：安全與團隊導入</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="5" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch15-security" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>15.</span><span data-astro-cid-ccykbmgk>安全：Mods 沒有沙箱，權限跟你一樣</span></a></li><li data-astro-cid-ccykbmgk><a href="/cc_mods/ch16-governance" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>16.</span><span data-astro-cid-ccykbmgk>團隊導入與治理：審查、管控與取捨</span></a></li></ul></div><div class="np" data-astro-cid-ccykbmgk><button class="pt" data-pid="6" data-astro-cid-ccykbmgk><span data-astro-cid-ccykbmgk>Part 6：附錄</span><svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-ccykbmgk><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-ccykbmgk></path></svg></button><ul class="nl closed" data-pl="6" data-astro-cid-ccykbmgk><li data-astro-cid-ccykbmgk><a href="/cc_mods/glossary" data-astro-cid-ccykbmgk><span class="cn" data-astro-cid-ccykbmgk>17.</span><span data-astro-cid-ccykbmgk>名詞解釋</span></a></li></ul></div></nav><div id="ov" data-astro-cid-ccykbmgk></div><main data-astro-cid-ccykbmgk><div class="cb" data-astro-cid-ccykbmgk><span class="clabel">第 12 章 · Part 4：實戰案例</span><h1>守門器、輪次計量條與 /pyenv</h1><p class="cdesc">三個實戰案例：守門、計量條與 /pyenv</p><p>前面幾章講的是零件。這一章用三個完整的案例把它們組起來：一個擋下危險操作的守門器、一個畫在輸入框上方的輪次計量條、一個替 Claude 查 Python 環境的 <code>/pyenv</code>。三個案例的程式碼都取自 Kanaries 的教學文章，作者在 Claude Code 2.1.293 的 Desktop app 上實作，三個 mod 都通過 <code>claude plugin validate</code> 與共 8 個自動化測試。程式碼我逐字保留，包含英文註解。</p><figure class="svg-fig"><svg width="100%" viewBox="0 0 800 285" xmlns="http://www.w3.org/2000/svg">
+  <g font-family="system-ui, sans-serif">
+    <rect x="20" y="15" width="240" height="250" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="140" y="52" text-anchor="middle" font-size="19px" font-weight="700" fill="var(--accent)">守門器</text>
+    <text x="140" y="80" text-anchor="middle" font-size="14px" fill="var(--muted)">safe-shell</text>
+    <text x="140" y="115" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">介入事件</text>
+    <line x1="40" y1="135" x2="240" y2="135" stroke="var(--border)" stroke-width="1"/>
+    <text x="140" y="160" text-anchor="middle" font-size="14px" fill="var(--muted)">核心事件</text>
+    <text x="140" y="185" text-anchor="middle" font-size="14px" fill="var(--text)">tool.call</text>
+    <text x="140" y="220" text-anchor="middle" font-size="14px" fill="var(--muted)">失敗時的選擇</text>
+    <text x="140" y="245" text-anchor="middle" font-size="15px" fill="var(--accent2)">拒絕（.catch 回 deny）</text>
+    <rect x="280" y="15" width="240" height="250" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="400" y="52" text-anchor="middle" font-size="19px" font-weight="700" fill="var(--accent)">計量條</text>
+    <text x="400" y="80" text-anchor="middle" font-size="14px" fill="var(--muted)">turn-meter</text>
+    <text x="400" y="115" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">畫在畫面上</text>
+    <line x1="300" y1="135" x2="500" y2="135" stroke="var(--border)" stroke-width="1"/>
+    <text x="400" y="160" text-anchor="middle" font-size="14px" fill="var(--muted)">核心事件</text>
+    <text x="400" y="185" text-anchor="middle" font-size="14px" fill="var(--text)">turn.complete、ui.render</text>
+    <text x="400" y="220" text-anchor="middle" font-size="14px" fill="var(--muted)">失敗時的選擇</text>
+    <text x="400" y="245" text-anchor="middle" font-size="15px" fill="var(--accent2)">放行（只負責顯示）</text>
+    <rect x="540" y="15" width="240" height="250" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="660" y="52" text-anchor="middle" font-size="19px" font-weight="700" fill="var(--accent)">/pyenv</text>
+    <text x="660" y="80" text-anchor="middle" font-size="14px" fill="var(--muted)">pyenv</text>
+    <text x="660" y="115" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">回應使用者的指令</text>
+    <line x1="560" y1="135" x2="760" y2="135" stroke="var(--border)" stroke-width="1"/>
+    <text x="660" y="160" text-anchor="middle" font-size="14px" fill="var(--muted)">核心事件</text>
+    <text x="660" y="185" text-anchor="middle" font-size="14px" fill="var(--text)">session.start、command.run</text>
+    <text x="660" y="220" text-anchor="middle" font-size="14px" fill="var(--muted)">失敗時的選擇</text>
+    <text x="660" y="245" text-anchor="middle" font-size="15px" fill="var(--accent2)">回一行錯誤文字，不丟例外</text>
+  </g>
+</svg><figcaption>圖 12-1：三個案例的形狀與失敗時的選擇</figcaption></figure><h2>案例一：守門器 safe-shell</h2><p>目標很單純：Claude 在自動模式或繞過權限的模式下，沒有東西會在 <code>git reset --hard</code> 之前攔住它。這個 mod 拒絕三種 shell 指令，並且不讓 <code>.env</code> 檔進入對話。</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>safe-shell/hooks/register.ts</span><button class="cb-copy" data-code="import type { Register } from 'claude-code'
+
+// Shell commands an agent should never run without a human typing them.
+const BLOCKED: { pattern: RegExp; reason: string }[] = [
+  {
+    pattern: /\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*\s+(\/|~|\$HOME)\/?\*?(\s|$)/,
+    reason: 'recursive delete of / or the home folder',
+  },
+  {
+    pattern: /\bgit\s+push\b.*(--force\b|--force-with-lease\b|\s-f\b).*\b(main|master)\b/,
+    reason: 'force push to main or master',
+  },
+  {
+    pattern: /\bgit\s+reset\s+--hard\b/,
+    reason: 'git reset --hard throws away uncommitted work',
+  },
+]
+
+// .env, .env.local, config/.env.production ... but not .env.example.
+const isSecretEnvFile = (path: string) =>
+  /(^|\/)\.env(\.[^/]+)?$/.test(path) &amp;&amp; !/\.(example|sample|template)$/.test(path)
+
+export const register: Register = on => {
+  on('tool.call', { tool: 'Bash' }, ($, e, next) => {
+    const hit = BLOCKED.find(rule => rule.pattern.test(e.command))
+    if (hit === undefined) {
+      return next(e)
+    }
+    $.ui.toast(`safe-shell blocked: ${hit.reason}`)
+
+    return { deny: `safe-shell: blocked (${hit.reason}). Ask the user to run it themselves.` }
+  }).catch(($, e, next) =>
+    // Fail closed: if the guard itself breaks, refuse instead of letting the command through.
+    next.called ? next(e) : { deny: 'safe-shell: the guard failed, so the command was not run.' },
+  )
+
+  for (const tool of ['Read', 'Edit', 'Write'] as const) {
+    on('tool.call', { tool }, ($, e, next) =>
+      isSecretEnvFile(e.file_path)
+        ? { deny: `safe-shell: ${e.file_path} holds secrets and stays out of the conversation.` }
+        : next(e),
+    ).catch(($, e, next) =>
+      next.called ? next(e) : { deny: 'safe-shell: the guard failed, so the file was not touched.' },
+    )
+  }
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="typescript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#C678DD"> type</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">Register</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'claude-code'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// Shell commands an agent should never run without a human typing them.</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> BLOCKED</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">pattern</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">RegExp</span><span style="color:#ABB2BF">; </span><span style="color:#E06C75">reason</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">string</span><span style="color:#ABB2BF"> }[] </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> [</span></span>
+<span class="line"><span style="color:#ABB2BF">  {</span></span>
+<span class="line"><span style="color:#E06C75">    pattern</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75"> /</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">rm\s</span><span style="color:#D19A66">+</span><span style="color:#E06C75">-</span><span style="color:#D19A66">[a-zA-Z]*[rR][a-zA-Z]*</span><span style="color:#E06C75">\s</span><span style="color:#D19A66">+</span><span style="color:#E06C75">(</span><span style="color:#56B6C2">\/</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">~</span><span style="color:#ABB2BF">|</span><span style="color:#56B6C2">\$</span><span style="color:#E06C75">HOME)</span><span style="color:#56B6C2">\/</span><span style="color:#D19A66">?</span><span style="color:#56B6C2">\*</span><span style="color:#D19A66">?</span><span style="color:#E06C75">(\s</span><span style="color:#ABB2BF">|</span><span style="color:#C678DD">$</span><span style="color:#E06C75">)/</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    reason</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'recursive delete of / or the home folder'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#ABB2BF">  {</span></span>
+<span class="line"><span style="color:#E06C75">    pattern</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75"> /</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">git\s</span><span style="color:#D19A66">+</span><span style="color:#E06C75">push</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">.</span><span style="color:#D19A66">*</span><span style="color:#E06C75">(--force</span><span style="color:#C678DD">\b</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">--force-with-lease</span><span style="color:#C678DD">\b</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">\s-f</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">).</span><span style="color:#D19A66">*</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">(main</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">master)</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">/</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    reason</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'force push to main or master'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#ABB2BF">  {</span></span>
+<span class="line"><span style="color:#E06C75">    pattern</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75"> /</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">git\s</span><span style="color:#D19A66">+</span><span style="color:#E06C75">reset\s</span><span style="color:#D19A66">+</span><span style="color:#E06C75">--hard</span><span style="color:#C678DD">\b</span><span style="color:#E06C75">/</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    reason</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'git reset --hard throws away uncommitted work'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#ABB2BF">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// .env, .env.local, config/.env.production ... but not .env.example.</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#61AFEF"> isSecretEnvFile</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">path</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">string</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span></span>
+<span class="line"><span style="color:#E06C75">  /(</span><span style="color:#C678DD">^</span><span style="color:#ABB2BF">|</span><span style="color:#56B6C2">\/</span><span style="color:#E06C75">)</span><span style="color:#56B6C2">\.</span><span style="color:#E06C75">env(</span><span style="color:#56B6C2">\.</span><span style="color:#D19A66">[</span><span style="color:#ABB2BF">^</span><span style="color:#D19A66">/]+</span><span style="color:#E06C75">)</span><span style="color:#D19A66">?</span><span style="color:#C678DD">$</span><span style="color:#E06C75">/</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">test</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">path</span><span style="color:#ABB2BF">) </span><span style="color:#56B6C2">&#x26;&#x26;</span><span style="color:#56B6C2"> !</span><span style="color:#E06C75">/</span><span style="color:#56B6C2">\.</span><span style="color:#E06C75">(example</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">sample</span><span style="color:#ABB2BF">|</span><span style="color:#E06C75">template)</span><span style="color:#C678DD">$</span><span style="color:#E06C75">/</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">test</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">path</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> const</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Register</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75;font-style:italic"> on</span><span style="color:#C678DD"> =></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF"> }, (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> hit</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> BLOCKED</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">find</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">rule</span><span style="color:#C678DD"> =></span><span style="color:#E5C07B"> rule</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">pattern</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">test</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">command</span><span style="color:#ABB2BF">))</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">hit</span><span style="color:#56B6C2"> ===</span><span style="color:#D19A66"> undefined</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">      return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#E5C07B">    $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">ui</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">toast</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">`safe-shell blocked: </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">hit</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">reason</span><span style="color:#C678DD">}</span><span style="color:#98C379">`</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">`safe-shell: blocked (</span><span style="color:#C678DD">${</span><span style="color:#E5C07B">hit</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">reason</span><span style="color:#C678DD">}</span><span style="color:#98C379">). Ask the user to run it themselves.`</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }).</span><span style="color:#61AFEF">catch</span><span style="color:#ABB2BF">((</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Fail closed: if the guard itself breaks, refuse instead of letting the command through.</span></span>
+<span class="line"><span style="color:#E5C07B">    next</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">called</span><span style="color:#C678DD"> ?</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">:</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'safe-shell: the guard failed, so the command was not run.'</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#ABB2BF">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">  for</span><span style="color:#ABB2BF"> (</span><span style="color:#C678DD">const</span><span style="color:#E5C07B"> tool</span><span style="color:#C678DD"> of</span><span style="color:#ABB2BF"> [</span><span style="color:#98C379">'Read'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'Edit'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'Write'</span><span style="color:#ABB2BF">] </span><span style="color:#C678DD">as</span><span style="color:#C678DD"> const</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#61AFEF">    on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF"> }, (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span></span>
+<span class="line"><span style="color:#61AFEF">      isSecretEnvFile</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">file_path</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">        ?</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">`safe-shell: </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">file_path</span><span style="color:#C678DD">}</span><span style="color:#98C379"> holds secrets and stays out of the conversation.`</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#C678DD">        :</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">),</span></span>
+<span class="line"><span style="color:#ABB2BF">    ).</span><span style="color:#61AFEF">catch</span><span style="color:#ABB2BF">((</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span></span>
+<span class="line"><span style="color:#E5C07B">      next</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">called</span><span style="color:#C678DD"> ?</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">:</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'safe-shell: the guard failed, so the file was not touched.'</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#ABB2BF">    )</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><script type="module">document.querySelectorAll(`.cb-copy`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent=`已複製!`,e.classList.add(`copied`),setTimeout(()=>{e.textContent=`複製`,e.classList.remove(`copied`)},2e3)})})});</script><p>先把規則讀清楚。第一條擋下對 <code>/</code>、<code>~</code> 或 <code>$HOME</code> 的遞迴刪除；第二條只擋強制推送到 <code>main</code> 或 <code>master</code>，<code>--force</code>、<code>--force-with-lease</code> 與 <code>-f</code> 都算；第三條擋 <code>git reset --hard</code>。<code>isSecretEnvFile</code> 認得 <code>.env</code>、<code>.env.local</code> 與 <code>config/.env.production</code>，但放行 <code>.env.example</code> 這類範本檔，所以 <code>Read</code>、<code>Edit</code>、<code>Write</code> 三個工具用同一個迴圈各掛一個 hook，被拒絕時 Claude 讀到的是 <code>deny</code> 的文字，使用者另外會看到一個 toast。</p><figure class="svg-fig"><img src="/cc_mods/img/ch12/01-infographic-guard-rules.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="safe-shell 擋下什麼" loading="lazy"><figcaption>圖 12-2：safe-shell 擋下什麼</figcaption></figure><p>有兩個設計比正規表示式更重要。第一，守門器在呼叫 <code>next</code> 之前就決定，因為 <code>next</code> 一旦執行，指令就已經跑了，之後回 <code>deny</code> 也無法復原。第二，每個守門 hook 都接 <code>.catch</code>，讓它「失敗就拒絕」：hook 丟例外或超過 10 秒時預設會被跳過，守門器被跳過就是放行，<code>next.called ? next(e) : deny</code> 這個 handler 改成拒絕。第 11 章解釋過 <code>next.called</code> 的意義。</p><figure class="svg-fig"><svg width="100%" viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+  <g font-family="system-ui, sans-serif">
+    <defs><marker id="ch12-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <rect x="20" y="20" width="200" height="70" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="120" y="50" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">Claude 呼叫 Bash</text>
+    <text x="120" y="75" text-anchor="middle" font-size="14px" fill="var(--text)">tool.call{tool=Bash}</text>
+    <rect x="300" y="20" width="200" height="70" rx="8" fill="var(--bg2)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="400" y="50" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">指令符合</text>
+    <text x="400" y="75" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">BLOCKED 規則？</text>
+    <rect x="580" y="20" width="200" height="70" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="680" y="50" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">next(e)</text>
+    <text x="680" y="75" text-anchor="middle" font-size="15px" fill="var(--text)">指令照常執行</text>
+    <line x1="220" y1="55" x2="298" y2="55" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch12-arrow)"/>
+    <line x1="500" y1="55" x2="578" y2="55" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch12-arrow)"/>
+    <text x="540" y="45" text-anchor="middle" font-size="14px" fill="var(--muted)">否</text>
+    <line x1="400" y1="90" x2="400" y2="128" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch12-arrow)"/>
+    <text x="412" y="115" text-anchor="start" font-size="14px" fill="var(--muted)">是</text>
+    <rect x="300" y="130" width="200" height="70" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="400" y="160" text-anchor="middle" font-size="15px" font-weight="700" fill="var(--text)">$.ui.toast 並回 deny</text>
+    <text x="400" y="185" text-anchor="middle" font-size="14px" fill="var(--text)">在 next 之前決定</text>
+    <text x="400" y="228" text-anchor="middle" font-size="14px" fill="var(--muted)">守門 hook 自己失敗時（丟例外或超過 10 秒）</text>
+    <rect x="20" y="240" width="360" height="65" rx="8" fill="var(--bg2)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="200" y="268" text-anchor="middle" font-size="17px" font-weight="700" fill="var(--text)">.catch 接手</text>
+    <text x="200" y="292" text-anchor="middle" font-size="15px" fill="var(--text)">先看 next.called</text>
+    <rect x="440" y="240" width="340" height="65" rx="8" fill="var(--bg2)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="610" y="268" text-anchor="middle" font-size="15px" fill="var(--text)">next.called 為真：next(e)</text>
+    <text x="610" y="292" text-anchor="middle" font-size="15px" fill="var(--text)">否則：deny，指令不執行</text>
+    <line x1="380" y1="272" x2="438" y2="272" stroke="var(--muted)" stroke-width="2" marker-end="url(#ch12-arrow)"/>
+  </g>
+</svg><figcaption>圖 12-3：safe-shell 的判斷與失敗處理</figcaption></figure><p>驗證時要看的第一件事，是每個守門 hook 有沒有 <code>.catch</code>：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>claude plugin validate 的輸出</span><button class="cb-copy" data-code="❯ ./register.ts hooks: tool.call{tool=Bash}, tool.call{tool=Read|Edit|Write}
+❯ ./register.ts gating hook with .catch: tool.call{tool=Bash}
+❯ ./register.ts gating hook with .catch: tool.call{tool=Read|Edit|Write}
+❯ ./register.ts calls: $.ui.toast
+✔ Validation passed" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="text"><code><span class="line"><span>❯ ./register.ts hooks: tool.call{tool=Bash}, tool.call{tool=Read|Edit|Write}</span></span>
+<span class="line"><span>❯ ./register.ts gating hook with .catch: tool.call{tool=Bash}</span></span>
+<span class="line"><span>❯ ./register.ts gating hook with .catch: tool.call{tool=Read|Edit|Write}</span></span>
+<span class="line"><span>❯ ./register.ts calls: $.ui.toast</span></span>
+<span class="line"><span>✔ Validation passed</span></span></code></pre></div></div><p>測試時，守門器在 <code>next</code> 之後沒有人回答，所以要先註冊 stand-in。作者的第一次執行就因為順序錯誤失敗，原因與第 10 章提過的一樣：stand-in 要在第一個 <code>$</code> 呼叫之前註冊。</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>守門器的測試（節錄）</span><button class="cb-copy" data-code="import { expect, test } from 'claude-code/testing'
+
+const ran = { stdout: 'ran', stderr: '', interrupted: false }
+
+test('blocks rm -rf on the home folder', async ($, on) => {
+  on('tool.call', { tool: 'Bash' }, () => ({ result: ran }))
+  const answer = await $.tool.call({ tool: 'Bash', command: 'rm -rf ~' })
+  expect(answer.deny).toContain('recursive delete')
+})
+
+test('lets ordinary commands through', async ($, on) => {
+  on('tool.call', { tool: 'Bash' }, () => ({ result: ran }))
+  const answer = await $.tool.call({ tool: 'Bash', command: 'rm -rf ./build &amp;&amp; python -m pytest -q' })
+  expect(answer.deny).toBeUndefined()
+})" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="typescript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">expect</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">test</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'claude-code/testing'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> ran</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">stdout</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'ran'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">stderr</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">''</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">interrupted</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">false</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">test</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'blocks rm -rf on the home folder'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">on</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF"> }, () </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> ({ </span><span style="color:#E06C75">result</span><span style="color:#ABB2BF">: </span><span style="color:#E06C75">ran</span><span style="color:#ABB2BF"> }))</span></span>
+<span class="line"><span style="color:#C678DD">  const</span><span style="color:#E5C07B"> answer</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">tool</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">call</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">command</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'rm -rf ~'</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#61AFEF">  expect</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">answer</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">toContain</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'recursive delete'</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">})</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">test</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'lets ordinary commands through'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">on</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF"> }, () </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> ({ </span><span style="color:#E06C75">result</span><span style="color:#ABB2BF">: </span><span style="color:#E06C75">ran</span><span style="color:#ABB2BF"> }))</span></span>
+<span class="line"><span style="color:#C678DD">  const</span><span style="color:#E5C07B"> answer</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">tool</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">call</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">tool</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'Bash'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">command</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'rm -rf ./build &#x26;&#x26; python -m pytest -q'</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#61AFEF">  expect</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">answer</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">deny</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">toBeUndefined</span><span style="color:#ABB2BF">()</span></span>
+<span class="line"><span style="color:#ABB2BF">})</span></span></code></pre></div></div><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>完整的四個測試</span><button class="cb-copy" data-code="(pass) blocks rm -rf on the home folder [16.23ms]
+(pass) blocks a force push to main [7.73ms]
+(pass) lets ordinary commands through [7.22ms]
+(pass) keeps .env out of Read but allows .env.example [9.40ms]
+
+ 4 pass
+ 0 fail" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="text"><code><span class="line"><span>(pass) blocks rm -rf on the home folder [16.23ms]</span></span>
+<span class="line"><span>(pass) blocks a force push to main [7.73ms]</span></span>
+<span class="line"><span>(pass) lets ordinary commands through [7.22ms]</span></span>
+<span class="line"><span>(pass) keeps .env out of Read but allows .env.example [9.40ms]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span> 4 pass</span></span>
+<span class="line"><span> 0 fail</span></span></code></pre></div></div><div class="call warn"><span class="ci">⚠️</span><div><strong>它只是第二道網，不是權限系統</strong><p>作者實測時，叫 Claude 執行 <code>echo "the words git reset --hard inside an echo"</code>，守門器照樣擋下：比對文字分不出「指令」與「提到指令的文字」，也抓不到藏在變數、腳本或別名裡的指令。真正不能發生的事，應該寫進權限的 <code>deny</code> 規則，而且不要只靠單一層。官方文件說，內建守門器載入時，使用者的 mod 不能核准被 deny 規則拒絕的呼叫，但管理員若設了 <code>allowModsToOverrideDenyRules</code>，這個保證就不成立；守門器沒有載入的地方，這個保證也不適用。</p></div></div><h2>案例二：輪次計量條</h2><p>輸入框上方的色帶與側邊面板是 mod 畫得最多的地方：在作者引用的 10 月 6 日目錄掃描裡，41% 的 mod 畫在色帶、40% 開面板。這個計量條顯示上一輪的耗時、工具呼叫次數與 token 數，還有一個 Hide 按鈕。畫面讀的值放在 <code>$.state</code>，而且每一個值都要在型別檔宣告，否則驗證不過：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>types/index.d.ts</span><button class="cb-copy" data-code="// types/index.d.ts, named in plugin.json as &quot;types&quot;: &quot;./types/index.d.ts&quot;
+export type TurnStats = {
+  seconds: number
+  tools: number
+  inputTokens: number
+  outputTokens: number
+  model: string | null
+}
+
+declare module 'claude-code' {
+  interface PluginState {
+    'turn-meter': { last: TurnStats | null; isHidden: boolean }
+  }
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="typescript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// types/index.d.ts, named in plugin.json as "types": "./types/index.d.ts"</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> type</span><span style="color:#E5C07B"> TurnStats</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E06C75">  seconds</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">number</span></span>
+<span class="line"><span style="color:#E06C75">  tools</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">number</span></span>
+<span class="line"><span style="color:#E06C75">  inputTokens</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">number</span></span>
+<span class="line"><span style="color:#E06C75">  outputTokens</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">number</span></span>
+<span class="line"><span style="color:#E06C75">  model</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">string</span><span style="color:#ABB2BF"> | </span><span style="color:#E5C07B">null</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">declare</span><span style="color:#C678DD"> module</span><span style="color:#98C379"> 'claude-code'</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">  interface</span><span style="color:#E5C07B"> PluginState</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#98C379">    'turn-meter'</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">last</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">TurnStats</span><span style="color:#ABB2BF"> | </span><span style="color:#E5C07B">null</span><span style="color:#ABB2BF">; </span><span style="color:#E06C75">isHidden</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">boolean</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><p>hook 本身負責四件事：<code>prompt.submit</code> 把計數歸零、<code>tool.call</code> 數主對話的工具呼叫（子代理的呼叫帶 <code>agentId</code>，要排除）、<code>turn.complete</code> 從 <code>durationMs</code> 與 <code>usage</code> 算出這一輪的數字並寫入 state，最後 <code>ui.render</code> 畫色帶：</p><figure class="svg-fig"><img src="/cc_mods/img/ch12/02-flow-turn-meter-hooks.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="輪次計量條的資料流" loading="lazy"><figcaption>圖 12-4：輪次計量條的資料流</figcaption></figure><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>turn-meter/hooks/register.tsx</span><button class="cb-copy" data-code="import { atom, read, update } from 'claude-code'
+import type { Register } from 'claude-code'
+
+import type { TurnStats } from '../types'
+
+const last = atom({ plugin: 'turn-meter', key: 'last' } as const, null)
+const isHidden = atom({ plugin: 'turn-meter', key: 'isHidden' } as const, false)
+
+const formatTokens = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n))
+
+export const register: Register = on => {
+  let tools = 0
+
+  on('prompt.submit', ($, e, next) => {
+    tools = 0
+    return next(e)
+  })
+
+  on('tool.call', ($, e, next) => {
+    // Count the main conversation's calls; subagents carry an agentId.
+    if (e.agentId === undefined) tools += 1
+    return next(e)
+  })
+
+  on('turn.complete', async ($, e, next) => {
+    if (e.agentId !== undefined) return next(e)
+    const usage = e.usage
+    const stats: TurnStats = {
+      seconds: Math.round(e.durationMs / 1000),
+      tools,
+      inputTokens: usage
+        ? usage.input_tokens + usage.cache_read_input_tokens + usage.cache_creation_input_tokens
+        : 0,
+      outputTokens: usage?.output_tokens ?? 0,
+      model: usage?.model ?? null,
+    }
+    await update($, last, () => stats)
+    if (stats.seconds > 120) $.ui.toast(`That turn took ${stats.seconds}s`)
+    return next(e)
+  })
+
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const stats = await read($, last)
+    if (e.props.hasSurvey || stats === null || (await read($, isHidden))) return next(e)
+
+    const { Box, Button, Text } = $.ui.resolve(e)
+    const model = stats.model === null ? '' : ` · ${stats.model}`
+    // The band is shared by every mod: keep what the mods beneath drew, then add a row.
+    const below = await next(e)
+
+    return (
+      <Box flexDirection=&quot;column&quot;>
+        {below}
+        <Box>
+          <Text dimColor>
+            {`Last turn: ${stats.seconds}s · ${stats.tools} tool calls · ${formatTokens(stats.inputTokens)} in / ${formatTokens(stats.outputTokens)} out${model} `}
+          </Text>
+          <Button key=&quot;hide&quot; label=&quot;Hide&quot; onPress={() => update($, isHidden, () => true)} />
+        </Box>
+      </Box>
+    )
+  })
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="typescript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">atom</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">read</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">update</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'claude-code'</span></span>
+<span class="line"><span style="color:#C678DD">import</span><span style="color:#C678DD"> type</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">Register</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'claude-code'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">import</span><span style="color:#C678DD"> type</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">TurnStats</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> '../types'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> last</span><span style="color:#56B6C2"> =</span><span style="color:#61AFEF"> atom</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">plugin</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'turn-meter'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">key</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'last'</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">as</span><span style="color:#C678DD"> const</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">null</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> isHidden</span><span style="color:#56B6C2"> =</span><span style="color:#61AFEF"> atom</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">plugin</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'turn-meter'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">key</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'isHidden'</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">as</span><span style="color:#C678DD"> const</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">false</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#61AFEF"> formatTokens</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">n</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">number</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">n</span><span style="color:#56B6C2"> >=</span><span style="color:#D19A66"> 1000</span><span style="color:#C678DD"> ?</span><span style="color:#98C379"> `</span><span style="color:#C678DD">${</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">n</span><span style="color:#56B6C2"> /</span><span style="color:#D19A66"> 1000</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">toFixed</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">1</span><span style="color:#ABB2BF">)</span><span style="color:#C678DD">}</span><span style="color:#98C379">k`</span><span style="color:#C678DD"> :</span><span style="color:#61AFEF"> String</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">n</span><span style="color:#ABB2BF">))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> const</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Register</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75;font-style:italic"> on</span><span style="color:#C678DD"> =></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">  let</span><span style="color:#E06C75"> tools</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> 0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'prompt.submit'</span><span style="color:#ABB2BF">, (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E06C75">    tools</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> 0</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'tool.call'</span><span style="color:#ABB2BF">, (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // Count the main conversation's calls; subagents carry an agentId.</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">agentId</span><span style="color:#56B6C2"> ===</span><span style="color:#D19A66"> undefined</span><span style="color:#ABB2BF">) </span><span style="color:#E06C75">tools</span><span style="color:#56B6C2"> +=</span><span style="color:#D19A66"> 1</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'turn.complete'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">agentId</span><span style="color:#56B6C2"> !==</span><span style="color:#D19A66"> undefined</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> usage</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">usage</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> stats</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">TurnStats</span><span style="color:#56B6C2"> =</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E06C75">      seconds</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Math</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">round</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">durationMs</span><span style="color:#56B6C2"> /</span><span style="color:#D19A66"> 1000</span><span style="color:#ABB2BF">),</span></span>
+<span class="line"><span style="color:#E06C75">      tools</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      inputTokens</span><span style="color:#ABB2BF">: </span><span style="color:#E06C75">usage</span></span>
+<span class="line"><span style="color:#C678DD">        ?</span><span style="color:#E5C07B"> usage</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">input_tokens</span><span style="color:#56B6C2"> +</span><span style="color:#E5C07B"> usage</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">cache_read_input_tokens</span><span style="color:#56B6C2"> +</span><span style="color:#E5C07B"> usage</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">cache_creation_input_tokens</span></span>
+<span class="line"><span style="color:#C678DD">        :</span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      outputTokens</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">usage</span><span style="color:#ABB2BF">?.</span><span style="color:#E06C75">output_tokens</span><span style="color:#56B6C2"> ??</span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      model</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">usage</span><span style="color:#ABB2BF">?.</span><span style="color:#E06C75">model</span><span style="color:#56B6C2"> ??</span><span style="color:#D19A66"> null</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#C678DD">    await</span><span style="color:#61AFEF"> update</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">last</span><span style="color:#ABB2BF">, () </span><span style="color:#C678DD">=></span><span style="color:#E06C75"> stats</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">seconds</span><span style="color:#56B6C2"> ></span><span style="color:#D19A66"> 120</span><span style="color:#ABB2BF">) </span><span style="color:#E5C07B">$</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">ui</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">toast</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">`That turn took </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">seconds</span><span style="color:#C678DD">}</span><span style="color:#98C379">s`</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'ui.render'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">component</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'AbovePrompt'</span><span style="color:#ABB2BF"> }, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> stats</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#61AFEF"> read</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">last</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">e</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">props</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">hasSurvey</span><span style="color:#56B6C2"> ||</span><span style="color:#E06C75"> stats</span><span style="color:#56B6C2"> ===</span><span style="color:#D19A66"> null</span><span style="color:#56B6C2"> ||</span><span style="color:#ABB2BF"> (</span><span style="color:#C678DD">await</span><span style="color:#61AFEF"> read</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">isHidden</span><span style="color:#ABB2BF">))) </span><span style="color:#C678DD">return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#ABB2BF"> { </span><span style="color:#E5C07B">Box</span><span style="color:#ABB2BF">, </span><span style="color:#E5C07B">Button</span><span style="color:#ABB2BF">, </span><span style="color:#E5C07B">Text</span><span style="color:#ABB2BF"> } </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">ui</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">resolve</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> model</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">model</span><span style="color:#56B6C2"> ===</span><span style="color:#D19A66"> null</span><span style="color:#C678DD"> ?</span><span style="color:#98C379"> ''</span><span style="color:#C678DD"> :</span><span style="color:#98C379"> ` · </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">model</span><span style="color:#C678DD">}</span><span style="color:#98C379">`</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // The band is shared by every mod: keep what the mods beneath drew, then add a row.</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> below</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#ABB2BF"> (</span></span>
+<span class="line"><span style="color:#56B6C2">      &#x3C;</span><span style="color:#E06C75">Box</span><span style="color:#E06C75"> flexDirection</span><span style="color:#56B6C2">=</span><span style="color:#98C379">"column"</span><span style="color:#56B6C2">></span></span>
+<span class="line"><span style="color:#ABB2BF">        {</span><span style="color:#E06C75;font-style:italic">below</span><span style="color:#ABB2BF">}</span></span>
+<span class="line"><span style="color:#ABB2BF">        &#x3C;</span><span style="color:#E5C07B">Box</span><span style="color:#ABB2BF">></span></span>
+<span class="line"><span style="color:#56B6C2">          &#x3C;</span><span style="color:#E06C75">Text</span><span style="color:#E06C75"> dimColor</span><span style="color:#56B6C2">></span></span>
+<span class="line"><span style="color:#ABB2BF">            {`</span><span style="color:#E06C75;font-style:italic">Last</span><span style="color:#E06C75"> turn</span><span style="color:#ABB2BF">: </span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">{</span><span style="color:#E06C75;font-style:italic">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75;font-style:italic">seconds</span><span style="color:#ABB2BF">}</span><span style="color:#E06C75;font-style:italic">s</span><span style="color:#ABB2BF"> · </span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">{</span><span style="color:#E06C75;font-style:italic">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75;font-style:italic">tools</span><span style="color:#ABB2BF">} </span><span style="color:#E06C75;font-style:italic">tool</span><span style="color:#E06C75;font-style:italic"> calls</span><span style="color:#ABB2BF"> · </span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">{</span><span style="color:#E06C75;font-style:italic">formatTokens</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75;font-style:italic">inputTokens</span><span style="color:#ABB2BF">)} </span><span style="color:#E06C75;font-style:italic">in</span><span style="color:#ABB2BF"> / </span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">{</span><span style="color:#E06C75;font-style:italic">formatTokens</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">stats</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75;font-style:italic">outputTokens</span><span style="color:#ABB2BF">)} </span><span style="color:#E06C75;font-style:italic">out$</span><span style="color:#ABB2BF">{</span><span style="color:#E06C75;font-style:italic">model</span><span style="color:#ABB2BF">} </span><span style="color:#98C379">`}</span></span>
+<span class="line"><span style="color:#98C379">          &#x3C;/Text></span></span>
+<span class="line"><span style="color:#98C379">          &#x3C;Button key="hide" label="Hide" onPress={() => update($, isHidden, () => true)} /></span></span>
+<span class="line"><span style="color:#98C379">        &#x3C;/Box></span></span>
+<span class="line"><span style="color:#98C379">      &#x3C;/Box></span></span>
+<span class="line"><span style="color:#98C379">    )</span></span>
+<span class="line"><span style="color:#98C379">  })</span></span>
+<span class="line"><span style="color:#98C379">}</span></span></code></pre></div></div><p>幾個細節值得留意：輸入 token 是 <code>input_tokens</code>、<code>cache_read_input_tokens</code> 與 <code>cache_creation_input_tokens</code> 三者相加，所以數字反映整輪實際送進模型的量；一輪超過 120 秒會額外跳 toast；<code>hasSurvey</code> 為真、還沒有任何一輪的資料、或使用者已按 Hide 時，hook 直接回 <code>next(e)</code> 把位置還回去。Hide 按鈕的 <code>onPress</code> 寫的是 state 而不是模組變數，所以按下去之後畫面會自己重畫，不必另外呼叫 <code>$.ui.invalidate</code>。</p><div class="call info"><span class="ci">💬</span><div><p><strong>在 10 月 6 日的目錄掃描裡，41% 的 mod 畫在色帶、40% 開面板：輸入框上方這一條，是 mod 畫得最多的地方。</strong></p></div></div><p>在作者的測試裡，終端機與桌面版都畫出這一行：</p><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>桌面版與終端機畫出的色帶</span><button class="cb-copy" data-code="Last turn: 42s · 0 tool calls · 18.2k in / 800 out · claude-opus-5-5 [ Hide ]" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="text"><code><span class="line"><span>Last turn: 42s · 0 tool calls · 18.2k in / 800 out · claude-opus-5-5 [ Hide ]</span></span></code></pre></div></div><p>作者從這個案例學到三件事。一，畫面用的值放 <code>$.state</code> 而不是模組變數，熱重載會重新執行 <code>register</code> 讓變數歸零，<code>$.state</code> 則會留著；<code>/clear</code> 會重來，要跨 <code>/clear</code> 保留就在 <code>session.end</code> 寫進 <code>$.store</code>。二，色帶是共用的：要先 <code>await next(e)</code>，把結果放進自己的 <code>Box</code>，否則會蓋掉其他 mod 的那一行，有位 note.com 的作者就因此弄丟過一條色帶。三，<code>Text</code> 元素沒有 <code>key</code>，測試時要用它的文字去找，像 <code>ui.find(&#123; type: 'Text', text: /Last turn/ &#125;)</code>。</p><h2>案例三：/pyenv</h2><p>資料科學的場景有個常見問題：Claude 的 Bash 工具執行的是 PATH 上第一個 <code>python3</code>，那常常不是你專案的環境。<code>/pyenv</code> 在 session 的 shell 環境執行一段探測，結果分成兩份：<code>text</code> 是你看到的那一行，<code>context</code> 是只有模型讀得到的備註，讓 Claude 之後的 Bash 呼叫知道用的是哪個直譯器，不必你再多說一句。</p><div class="call info"><span class="ci">💬</span><div><p><strong>作者掃描的 2,690 個公開 mod，名稱或描述提到 Jupyter、pandas、venv 或 conda 的一個也沒有；而 Claude 的 Bash 跑的，偏偏是 PATH 上第一個 <code>python3</code>。</strong></p></div></div><p>探測腳本讀的是套件的 metadata 而不是真的 import，所以不論 pandas 有多肥都很快；它依序回報直譯器路徑與版本、目前啟用的 <code>VIRTUAL_ENV</code> 或 <code>CONDA_PREFIX</code>，以及五個資料科學常用套件有沒有安裝。作者在 2026 年 10 月 6 日掃描的 2,690 個公開 mod 裡，名稱或描述提到 Jupyter、pandas、DataFrame、Polars、venv 或 conda 的一個也沒有，這個小工具填的是這個空缺。</p><figure class="svg-fig"><img src="/cc_mods/img/ch12/03-comparison-pyenv-text-context.png" style="width:85%;height:auto;display:block;margin:0 auto;" alt="/pyenv 回傳兩份結果" loading="lazy"><figcaption>圖 12-5：/pyenv 回傳兩份結果</figcaption></figure><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>pyenv/hooks/register.ts</span><button class="cb-copy" data-code="import type { Register } from 'claude-code'
+
+// Reads package versions from metadata instead of importing them, so it stays fast.
+const PROBE = `
+import os, sys
+from importlib.metadata import PackageNotFoundError, version
+env = os.environ.get(&quot;VIRTUAL_ENV&quot;) or os.environ.get(&quot;CONDA_PREFIX&quot;) or &quot;none (system or tool-managed Python)&quot;
+print(f&quot;python: {sys.executable} ({sys.version.split()[0]})&quot;)
+print(f&quot;env: {env}&quot;)
+for name in (&quot;pandas&quot;, &quot;numpy&quot;, &quot;polars&quot;, &quot;matplotlib&quot;, &quot;pygwalker&quot;):
+    try:
+        print(f&quot;{name}: {version(name)}&quot;)
+    except PackageNotFoundError:
+        print(f&quot;{name}: not installed&quot;)
+`
+
+export const register: Register = on => {
+  on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'pyenv',
+      description: &quot;Show which Python, environment and data packages this session's shell uses&quot;,
+    })
+    return next(e)
+  })
+
+  on('command.run', { command: 'pyenv' }, async $ => {
+    try {
+      const probe = await $.process.run(['python3', '-c', PROBE], { timeoutMs: 15_000 })
+      if (probe.exitCode !== 0) {
+        return { text: `pyenv: python3 exited with ${probe.exitCode}: ${probe.stderr.trim().slice(0, 300)}` }
+      }
+      const report = probe.stdout.trim()
+      // `text` is the row you see; `context` is a note only the model reads.
+      return {
+        text: report,
+        context: [`Python environment of this session's shell, from /pyenv:\n${report}`],
+      }
+    } catch (error) {
+      return { text: `pyenv: could not run python3 (${String(error).slice(0, 200)})` }
+    }
+  })
+}" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="typescript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#C678DD"> type</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">Register</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'claude-code'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// Reads package versions from metadata instead of importing them, so it stays fast.</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> PROBE</span><span style="color:#56B6C2"> =</span><span style="color:#98C379"> `</span></span>
+<span class="line"><span style="color:#98C379">import os, sys</span></span>
+<span class="line"><span style="color:#98C379">from importlib.metadata import PackageNotFoundError, version</span></span>
+<span class="line"><span style="color:#98C379">env = os.environ.get("VIRTUAL_ENV") or os.environ.get("CONDA_PREFIX") or "none (system or tool-managed Python)"</span></span>
+<span class="line"><span style="color:#98C379">print(f"python: {sys.executable} ({sys.version.split()[0]})")</span></span>
+<span class="line"><span style="color:#98C379">print(f"env: {env}")</span></span>
+<span class="line"><span style="color:#98C379">for name in ("pandas", "numpy", "polars", "matplotlib", "pygwalker"):</span></span>
+<span class="line"><span style="color:#98C379">    try:</span></span>
+<span class="line"><span style="color:#98C379">        print(f"{name}: {version(name)}")</span></span>
+<span class="line"><span style="color:#98C379">    except PackageNotFoundError:</span></span>
+<span class="line"><span style="color:#98C379">        print(f"{name}: not installed")</span></span>
+<span class="line"><span style="color:#98C379">`</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#C678DD"> const</span><span style="color:#61AFEF"> register</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Register</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75;font-style:italic"> on</span><span style="color:#C678DD"> =></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'session.start'</span><span style="color:#ABB2BF">, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">$</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">e</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">next</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">    await</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">command</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">register</span><span style="color:#ABB2BF">({</span></span>
+<span class="line"><span style="color:#E06C75">      name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'pyenv'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      description</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"Show which Python, environment and data packages this session's shell uses"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">    })</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#61AFEF"> next</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">e</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  on</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'command.run'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">command</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'pyenv'</span><span style="color:#ABB2BF"> }, </span><span style="color:#C678DD">async</span><span style="color:#E06C75;font-style:italic"> $</span><span style="color:#C678DD"> =></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">    try</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">      const</span><span style="color:#E5C07B"> probe</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#E5C07B"> $</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">process</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">run</span><span style="color:#ABB2BF">([</span><span style="color:#98C379">'python3'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'-c'</span><span style="color:#ABB2BF">, </span><span style="color:#E5C07B">PROBE</span><span style="color:#ABB2BF">], { </span><span style="color:#E06C75">timeoutMs</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">15_000</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#C678DD">      if</span><span style="color:#ABB2BF"> (</span><span style="color:#E5C07B">probe</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">exitCode</span><span style="color:#56B6C2"> !==</span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">        return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">text</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">`pyenv: python3 exited with </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">probe</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">exitCode</span><span style="color:#C678DD">}</span><span style="color:#98C379">: </span><span style="color:#C678DD">${</span><span style="color:#E5C07B">probe</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">stderr</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">trim</span><span style="color:#ABB2BF">().</span><span style="color:#61AFEF">slice</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">300</span><span style="color:#ABB2BF">)</span><span style="color:#C678DD">}</span><span style="color:#98C379">`</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">      }</span></span>
+<span class="line"><span style="color:#C678DD">      const</span><span style="color:#E5C07B"> report</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> probe</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">stdout</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">trim</span><span style="color:#ABB2BF">()</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">      // `text` is the row you see; `context` is a note only the model reads.</span></span>
+<span class="line"><span style="color:#C678DD">      return</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E06C75">        text</span><span style="color:#ABB2BF">: </span><span style="color:#E06C75">report</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">        context</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">`Python environment of this session's shell, from /pyenv:</span><span style="color:#56B6C2">\n</span><span style="color:#C678DD">${</span><span style="color:#E06C75">report</span><span style="color:#C678DD">}</span><span style="color:#98C379">`</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#ABB2BF">      }</span></span>
+<span class="line"><span style="color:#ABB2BF">    } </span><span style="color:#C678DD">catch</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">error</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">      return</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">text</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">`pyenv: could not run python3 (</span><span style="color:#C678DD">${</span><span style="color:#61AFEF">String</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">error</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">slice</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">200</span><span style="color:#ABB2BF">)</span><span style="color:#C678DD">}</span><span style="color:#98C379">)`</span><span style="color:#ABB2BF"> }</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  })</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre></div></div><div class="cb-wrap" data-astro-cid-c6nuo4je><div class="cb-bar" data-astro-cid-c6nuo4je><span class="cb-label" data-astro-cid-c6nuo4je>/pyenv 在作者機器上的輸出</span><button class="cb-copy" data-code="python: /Users/<you>/.local/bin/python3 (3.14.2)
+env: none (system or tool-managed Python)
+pandas: 3.0.1
+numpy: 2.4.2
+polars: not installed
+matplotlib: 3.11.0
+pygwalker: not installed" data-astro-cid-c6nuo4je>複製</button></div><div class="cb-inner" data-astro-cid-c6nuo4je><pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-c6nuo4je data-language="text"><code><span class="line"><span>python: /Users/&#x3C;you>/.local/bin/python3 (3.14.2)</span></span>
+<span class="line"><span>env: none (system or tool-managed Python)</span></span>
+<span class="line"><span>pandas: 3.0.1</span></span>
+<span class="line"><span>numpy: 2.4.2</span></span>
+<span class="line"><span>polars: not installed</span></span>
+<span class="line"><span>matplotlib: 3.11.0</span></span>
+<span class="line"><span>pygwalker: not installed</span></span></code></pre></div></div><p>這份輸出顯示當時沒有啟用虛擬環境，所以 Claude 的 <code>pip install</code> 會裝進全域的直譯器。mod 的指令直接執行你的函式，不花一輪模型。要讓它在 Claude 工作中也能執行，登記時得加 <code>immediate: true</code>（教學原文說指令在 Claude 忙碌時也會立即執行，官方 API 文件則要求這個旗標，以官方為準）。<code>$.process.run</code> 收的是參數陣列、不經 shell，預設 30 秒逾時，這裡明確設成 <code>timeoutMs: 15_000</code>。作者另外確認過 PATH：在他的 Desktop session 裡，單純的 <code>$.process.run</code> 拿到的 PATH 與 Bash 工具完全一樣；改用 <code>zsh -lc</code> 登入 shell 反而讀不到 <code>~/.zshrc</code>，解析到錯的版本。所以維持單純呼叫，結果看起來不對時，用在提示字元輸入 <code>!which python3</code> 比對。測試時，替 <code>$.process.run</code> 與 <code>$.command.register</code> 這類 <code>$</code> 呼叫做 stand-in，要回 <code>&#123; value: ... &#125;</code>。</p><p>它也有明確的邊界：如果你的分析主要在 notebook 裡做，這個 mod 幫助有限，因為 Claude Code 是把 <code>.ipynb</code> 當 JSON 檔編輯，看不到執行中的 kernel。</p><h2>三個案例的對照</h2><p>三個 mod 各代表一種常見的形狀：守門器介入事件、計量條畫在畫面上、<code>/pyenv</code> 回應使用者的指令。挑哪一種做起點，取決於你要改變 Claude 做的事、要看見 Claude 做了什麼，還是要在需要時隨手問它一件事。差別主要在失敗時要怎麼收場：</p><table><thead><tr><th>案例</th><th>核心事件</th><th>使用的 <code>$</code> API</th><th>失敗時的選擇</th></tr></thead><tbody><tr><td>守門器</td><td><code>tool.call</code></td><td><code>$.ui.toast</code></td><td>拒絕（<code>.catch</code> 回 <code>deny</code>）</td></tr><tr><td>計量條</td><td><code>turn.complete</code>、<code>ui.render</code></td><td><code>$.state</code>、<code>$.ui.resolve</code>、<code>$.ui.toast</code></td><td>放行（只負責顯示）</td></tr><tr><td>/pyenv</td><td><code>session.start</code>、<code>command.run</code></td><td><code>$.command.register</code>、<code>$.process.run</code></td><td>回一行錯誤文字，不丟例外</td></tr></tbody></table><h2>下一章預告</h2><p>下一章接著看更多面板類的 mod：用量儀表、快取倒數、遮罩與待辦，看同樣的 <code>ui.render</code> 與 <code>$.state</code> 怎麼變出不同的畫面。</p></div><nav class="cnav" data-astro-cid-ccykbmgk><a href="/cc_mods/ch11-compose-mods" class="prev" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>← 上一章</span><span class="nt" data-astro-cid-ccykbmgk>組合多個 Mod：hook 順序與 noun contract</span></a><a href="/cc_mods/ch13-case-panels" class="next" data-astro-cid-ccykbmgk><span class="nd" data-astro-cid-ccykbmgk>下一章 →</span><span class="nt" data-astro-cid-ccykbmgk>面板類 Mod：用量儀表、快取倒數、遮罩與待辦</span></a></nav></main></div><script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script></body></html>
